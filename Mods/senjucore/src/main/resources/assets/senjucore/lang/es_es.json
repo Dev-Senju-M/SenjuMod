@@ -3,5 +3,8 @@
   "senjucore.aviso": "Te quedan %s minutos de juego hoy.",
   "senjucore.cmd.ver": "%s: usado %s, restante %s",
   "senjucore.cmd.reiniciar": "Tiempo de %s reiniciado: restante = límite completo.",
-  "senjucore.cmd.dar": "Se dieron %s minutos a %s. Restante: %s."
+  "senjucore.cmd.dar": "Se dieron %s minutos a %s. Restante: %s.",
+  "key.categories.senjucore": "Senju Core",
+  "key.senjucore.mostrar": "Mostrar/ocultar panel",
+  "key.senjucore.posicion": "Cambiar posición del panel"
 }
