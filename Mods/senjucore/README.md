@@ -82,6 +82,13 @@ Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `Humo
 Prueba rápida del límite: en `run/config/senjucore-common.toml` pon `horasDiarias = 0.05` (3 minutos).
 Arranca `runServer` y `runClient` y entra a `localhost`.
 
+> **Importante (solo para pruebas):** el cliente de desarrollo entra como `Dev`, sin cuenta de
+> Mojang. En `run/server.properties` pon `online-mode=false` y `enforce-secure-profile=false`,
+> o el servidor te rechazará con "Failed to verify username". No uses esto en el servidor real.
+>
+> Si al detener el juego desde IntelliJ ves `Build cancelled while executing task ...BootstrapLauncher.main()`,
+> no es un error: solo significa que la ejecución se detuvo con el botón de stop.
+
 - [ ] Panel: con `nombreServidor = "Senju Test"` aparecen nombre del servidor, cara y nombre, tiempo restante, hora (12 h) y "Misiones: Próximamente".
 - [ ] `J` recorre las 6 posiciones (incluidas medio-izq y medio-der) sin salirse de la pantalla, también con GUI scale 4.
 - [ ] `H` oculta y muestra el panel; al reiniciar el cliente se conservan posición y visibilidad.
