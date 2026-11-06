@@ -10,6 +10,10 @@ public final class ClientConfig {
     public static final ForgeConfigSpec.IntValue DESPLAZAMIENTO_X;
     public static final ForgeConfigSpec.IntValue DESPLAZAMIENTO_Y;
     public static final ForgeConfigSpec.DoubleValue ESCALA;
+    public static final ForgeConfigSpec.BooleanValue FUENTE_PERSONALIZADA;
+    public static final ForgeConfigSpec.BooleanValue MAQUINA_ESCRIBIR;
+    public static final ForgeConfigSpec.BooleanValue RGB;
+    public static final ForgeConfigSpec.DoubleValue VELOCIDAD_RGB;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -18,6 +22,10 @@ public final class ClientConfig {
         DESPLAZAMIENTO_X = b.defineInRange("desplazamientoX", 0, -10000, 10000);
         DESPLAZAMIENTO_Y = b.defineInRange("desplazamientoY", 0, -10000, 10000);
         ESCALA = b.defineInRange("escala", 1.0, 0.5, 2.0);
+        FUENTE_PERSONALIZADA = b.define("fuentePersonalizada", true);
+        MAQUINA_ESCRIBIR = b.define("maquinaEscribir", true);
+        RGB = b.define("rgb", true);
+        VELOCIDAD_RGB = b.defineInRange("velocidadRgb", 1.0, 0.25, 4.0);
         SPEC = b.build();
     }
 

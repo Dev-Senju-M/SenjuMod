@@ -46,6 +46,14 @@ Se generan en `run/config/` (desarrollo) o `config/` (instalación normal) al ar
 | `posicion` | `ARRIBA_IZQ` | `ARRIBA_IZQ, MEDIO_IZQ, ABAJO_IZQ, ARRIBA_DER, MEDIO_DER, ABAJO_DER` |
 | `desplazamientoX` / `desplazamientoY` | `0` | Ajuste fino en píxeles |
 | `escala` | `1.0` (0.5 a 2.0) | Tamaño del panel |
+| `fuentePersonalizada` | `true` | Usa la fuente Tektur en el panel (`false` = fuente de Minecraft) |
+| `maquinaEscribir` | `true` | El nombre del servidor se escribe y borra como en una máquina de escribir |
+| `rgb` | `true` | Colores RGB animados (`false` = colores clásicos, sin parpadeo) |
+| `velocidadRgb` | `1.0` (0.25 a 4.0) | Velocidad del ciclo de colores |
+
+## Efectos visuales
+
+Las cuatro opciones de efectos están en `senjucore-client.toml` (tabla anterior). La fuente es Tektur (SIL OFL 1.1, ver `src/main/resources/assets/senjucore/font/OFL.txt`) y solo se aplica al panel. Con `rgb = true`, cada letra del nombre del servidor y cada línea tienen su propio tono; con límite diario y menos de 10 min restantes la línea de tiempo parpadea. Si la fuente se ve más grande o pequeña que la de Minecraft, ajusta `size`, `shift` u `oversample` en `src/main/resources/assets/senjucore/font/panel.json` (valores actuales: `size` 9.0, `shift` [0, 1], `oversample` 4.0; no se verificó el tamaño visual en el juego).
 
 ## Teclas (configurables en Controles > "Senju Core")
 
@@ -104,3 +112,9 @@ Arranca `runServer` y `runClient` y entra a `localhost`.
 - [ ] Un jugador no operador recibe "comando desconocido" con `/tiempo`.
 - [ ] Un jugador: crear mundo nuevo; el panel muestra el nombre del mundo y "Tiempo jugado hoy" creciendo; nunca te expulsa.
 - [ ] Las teclas aparecen en Controles bajo "Senju Core".
+- [ ] Efectos: la fuente Tektur se ve legible en el panel con escala 1, 2 y 3 (GUI scale).
+- [ ] Efectos: el nombre del servidor se escribe, hace pausa, se borra y repite, con cursor `_` parpadeante; el ancho del panel no cambia.
+- [ ] Efectos: con `rgb = true` los colores cambian de forma continua (letra por letra en el servidor, por línea en el resto).
+- [ ] Efectos: con `horasDiarias = 0.15` la línea de tiempo parpadea cuando quedan menos de 10 min.
+- [ ] Efectos: con `rgb = false` vuelven los colores clásicos (blanco, tiempo verde/amarillo/rojo, misiones gris) y no hay parpadeo.
+- [ ] Efectos: con `fuentePersonalizada = false` el panel vuelve a la fuente de Minecraft.
