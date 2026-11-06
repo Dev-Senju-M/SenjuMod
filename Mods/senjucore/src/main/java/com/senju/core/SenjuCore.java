@@ -1,7 +1,13 @@
 package com.senju.core;
 
-import net.minecraftforge.fml.common.Mod;
+import com.senju.core.config.ClientConfig;
+import com.senju.core.config.CommonConfig;
+import com.senju.core.network.Red;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
@@ -13,6 +19,10 @@ public class SenjuCore {
 
     public SenjuCore() {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-        LOGGER.info("Senju Core cargado ({})", modBus != null);
+        ModLoadingContext ctx = ModLoadingContext.get();
+        ctx.registerConfig(ModConfig.Type.COMMON, CommonConfig.SPEC, "senjucore-common.toml");
+        ctx.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC, "senjucore-client.toml");
+        modBus.addListener((FMLCommonSetupEvent e) -> e.enqueueWork(Red::registrar));
+        LOGGER.info("Senju Core cargado");
     }
 }
