@@ -26,6 +26,7 @@ public class SenjuCore {
         ctx.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC, "senjucore-client.toml");
         modBus.addListener((FMLCommonSetupEvent e) -> e.enqueueWork(Red::registrar));
         MinecraftForge.EVENT_BUS.register(new ControlTiempo());
+        MinecraftForge.EVENT_BUS.register(new com.senju.core.tiempo.ComandoTiempo());
         LOGGER.info("Senju Core cargado");
     }
 }
