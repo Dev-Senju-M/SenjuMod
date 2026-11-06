@@ -84,11 +84,14 @@ minecraft {
         client {
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             property 'forge.enabledGameTestNamespaces', mod_id
+            // Límite de memoria: el equipo tiene ~7 GB y cliente + servidor + IntelliJ no caben sin límites.
+            jvmArgs '-Xmx2G'
         }
 
         server {
             property 'forge.enabledGameTestNamespaces', mod_id
             args '--nogui'
+            jvmArgs '-Xmx1G'
         }
 
         // This run config launches GameTestServer and runs all registered gametests, then exits.
