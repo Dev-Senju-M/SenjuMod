@@ -53,7 +53,7 @@ Se generan en `run/config/` (desarrollo) o `config/` (instalación normal) al ar
 
 ## Efectos visuales
 
-Las cuatro opciones de efectos están en `senjucore-client.toml` (tabla anterior). La fuente es Tektur (SIL OFL 1.1, ver `src/main/resources/assets/senjucore/font/OFL.txt`) y solo se aplica al panel. Con `rgb = true`, cada letra del nombre del servidor y cada línea tienen su propio tono; con límite diario y menos de 10 min restantes la línea de tiempo parpadea. Si la fuente se ve más grande o pequeña que la de Minecraft, ajusta `size`, `shift` u `oversample` en `src/main/resources/assets/senjucore/font/panel.json` (valores actuales: `size` 9.0, `shift` [0, 1], `oversample` 4.0; no se verificó el tamaño visual en el juego).
+Las cuatro opciones de efectos están en `senjucore-client.toml` (tabla anterior). La fuente es Tektur (SIL OFL 1.1, ver `src/main/resources/assets/senjucore/font/OFL.txt`) y solo se aplica al panel. Con `rgb = true`, cada letra del nombre del servidor y cada línea tienen su propio tono; con límite diario y menos de 10 min restantes la línea de tiempo parpadea. Si la fuente se ve más grande o pequeña que la de Minecraft, ajusta `size`, `shift` u `oversample` en `src/main/resources/assets/senjucore/font/panel.json` (valores actuales: `size` 13.0, `shift` [0, 0], `oversample` 4.0; si los trazos finos se ven rotos con escala de GUI 1–2, baja `oversample` a 2–3; no se verificó el tamaño visual en el juego).
 
 ## Teclas (configurables en Controles > "Senju Core")
 
@@ -116,5 +116,5 @@ Arranca `runServer` y `runClient` y entra a `localhost`.
 - [ ] Efectos: el nombre del servidor se escribe, hace pausa, se borra y repite, con cursor `_` parpadeante; el ancho del panel no cambia.
 - [ ] Efectos: con `rgb = true` los colores cambian de forma continua (letra por letra en el servidor, por línea en el resto).
 - [ ] Efectos: con `horasDiarias = 0.15` la línea de tiempo parpadea cuando quedan menos de 10 min.
-- [ ] Efectos: con `rgb = false` vuelven los colores clásicos (blanco, tiempo verde/amarillo/rojo, misiones gris) y no hay parpadeo.
+- [ ] Efectos: con `rgb = false` vuelven los colores clásicos (blanco, tiempo blanco/amarillo/rojo, misiones gris) y no hay parpadeo.
 - [ ] Efectos: con `fuentePersonalizada = false` el panel vuelve a la fuente de Minecraft.

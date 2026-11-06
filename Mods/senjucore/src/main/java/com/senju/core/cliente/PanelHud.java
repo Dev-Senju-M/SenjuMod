@@ -1,6 +1,7 @@
 package com.senju.core.cliente;
 
 import com.senju.core.config.ClientConfig;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -9,7 +10,9 @@ import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
@@ -34,6 +37,8 @@ public final class PanelHud implements IGuiOverlay {
         if (DatosCliente.sinLimite() && mc.getSingleplayerServer() != null) {
             servidor = mc.getSingleplayerServer().getWorldData().getLevelName();
         }
+        servidor = ChatFormatting.stripFormatting(servidor);
+        if (servidor == null) servidor = "";
         String nombre = mc.player.getGameProfile().getName();
         String tiempo = null;
         int colorTiempo = 0xFFFFFF;
@@ -103,22 +108,30 @@ public final class PanelHud implements IGuiOverlay {
 
     private static void dibujarServidor(GuiGraphics gfx, Font font, String servidor, Style estilo, boolean escribir,
                                         boolean rgb, double vel, long ms, int x, int y) {
-        int n = servidor.length();
+        String limpio = ChatFormatting.stripFormatting(servidor);
+        if (limpio == null) limpio = "";
+        int n = limpio.codePointCount(0, limpio.length());
         int visibles = escribir ? Efectos.letrasVisibles(ms, n) : n;
+        String parte = limpio.substring(0, limpio.offsetByCodePoints(0, visibles));
+        boolean cursor = escribir && Efectos.cursorVisible(ms);
         if (!rgb) {
-            String texto = servidor.substring(0, visibles);
-            if (escribir && Efectos.cursorVisible(ms)) texto += "_";
+            String texto = cursor ? parte + "_" : parte;
             if (!texto.isEmpty()) gfx.drawString(font, txt(texto, estilo), x, y, 0xFFFFFF);
             return;
         }
-        int cx = x;
-        for (int k = 0; k < visibles; k++) {
-            Component c = txt(String.valueOf(servidor.charAt(k)), estilo);
-            gfx.drawString(font, c, cx, y, Efectos.colorRgb(ms, vel, k * Efectos.DESFASE_LETRA));
-            cx += font.width(c);
+        MutableComponent comp = Component.empty();
+        int k = 0;
+        for (int i = 0; i < parte.length(); ) {
+            int cp = parte.codePointAt(i);
+            i += Character.charCount(cp);
+            comp.append(letra(new String(Character.toChars(cp)), estilo, ms, vel, k++));
         }
-        if (escribir && Efectos.cursorVisible(ms)) {
-            gfx.drawString(font, txt("_", estilo), cx, y, Efectos.colorRgb(ms, vel, visibles * Efectos.DESFASE_LETRA));
-        }
+        if (cursor) comp.append(letra("_", estilo, ms, vel, n));
+        if (!comp.getSiblings().isEmpty()) gfx.drawString(font, comp, x, y, 0xFFFFFF);
+    }
+
+    private static MutableComponent letra(String ch, Style estilo, long ms, double vel, int k) {
+        return Component.literal(ch).withStyle(estilo.withColor(TextColor.fromRgb(
+                Efectos.colorRgb(ms, vel, k * Efectos.DESFASE_LETRA) & 0xFFFFFF)));
     }
 }
