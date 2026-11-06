@@ -58,6 +58,8 @@ Se generan en `run/config/` (desarrollo) o `config/` (instalación normal) al ar
 - `/tiempo reiniciar <jugador>`: pone el tiempo usado a 0.
 - `/tiempo dar <jugador> <minutos>`: da de 1 a 1440 minutos extra (hasta el máximo diario).
 
+Funcionan también con jugadores desconectados (por ejemplo, uno ya expulsado por agotar su tiempo).
+
 ## Comportamiento
 
 - Servidor: el tiempo restante baja cada segundo, avisa en `avisosMinutos` y expulsa al llegar a 0.
@@ -73,7 +75,7 @@ Se generan en `run/config/` (desarrollo) o `config/` (instalación normal) al ar
 - `network`: `Red`, `PaqueteTiempo`, `PaqueteInfoServidor`.
 - `cliente`: `PanelHud`, `Teclas`, `EventosCliente`, `DatosCliente`, `Posicion`, `Formato`.
 
-Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest` (20 en total).
+Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest` (23 en total).
 
 ## Pruebas dentro del juego (checklist)
 
@@ -85,10 +87,13 @@ Arranca `runServer` y `runClient` y entra a `localhost`.
 - [ ] `H` oculta y muestra el panel; al reiniciar el cliente se conservan posición y visibilidad.
 - [ ] F1 oculta el panel; abrir el inventario lo oculta; el chat lo mantiene.
 - [ ] Con `horasDiarias = 0.5` el tiempo se pone amarillo (< 30 min) y luego rojo (< 10 min).
-- [ ] Con `horasDiarias = 0.05`: aviso "Te quedan 1 minutos" hacia los 2 min y expulsión a los 3 min con el mensaje.
+- [ ] Con `horasDiarias = 0.05`: aviso "Te quedan 1 min de juego hoy." hacia los 2 min y expulsión a los 3 min con el mensaje.
 - [ ] Reconectar el mismo día: te rechaza al instante. Reiniciar el servidor y reconectar: sigue rechazando (persistencia).
 - [ ] Tras la medianoche del servidor se puede entrar con el tiempo completo.
 - [ ] Como operador (`op <nombre>` en la consola): `/tiempo ver`, `/tiempo dar <jugador> 5` (sube 5 min y el HUD se actualiza), `/tiempo reiniciar` (restante = límite completo).
+- [ ] `/tiempo reiniciar <jugador>` sobre un jugador ya expulsado → puede volver a entrar.
+- [ ] Con F3 abierto el panel se oculta.
+- [ ] En ABAJO_IZQ/ABAJO_DER con la ventana por defecto (854x480) el panel no tapa la barra rápida ni los corazones.
 - [ ] Un jugador no operador recibe "comando desconocido" con `/tiempo`.
 - [ ] Un jugador: crear mundo nuevo; el panel muestra el nombre del mundo y "Tiempo jugado hoy" creciendo; nunca te expulsa.
 - [ ] Las teclas aparecen en Controles bajo "Senju Core".

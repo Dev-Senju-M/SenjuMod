@@ -42,6 +42,16 @@ public class ControlTiempo {
 
     public static void expulsar(ServerPlayer p) {
         p.connection.disconnect(Component.translatable("senjucore.expulsado"));
+        guardar(p.server);
+    }
+
+    static void guardar(MinecraftServer server) {
+        server.overworld().getDataStorage().save();
+    }
+
+    @SubscribeEvent
+    public void alSalir(PlayerEvent.PlayerLoggedOutEvent ev) {
+        if (ev.getEntity() instanceof ServerPlayer p) guardar(p.server);
     }
 
     @SubscribeEvent

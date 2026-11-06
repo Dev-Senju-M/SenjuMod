@@ -6,6 +6,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -24,7 +25,7 @@ public final class EventosCliente {
 
         @SubscribeEvent
         public static void overlays(RegisterGuiOverlaysEvent e) {
-            e.registerAboveAll("panel", new PanelHud());
+            e.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "panel", new PanelHud());
         }
     }
 

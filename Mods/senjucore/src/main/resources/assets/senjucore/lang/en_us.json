@@ -1,6 +1,6 @@
 {
   "senjucore.expulsado": "Se acabó tu tiempo de hoy. Vuelve después de la medianoche (hora del servidor).",
-  "senjucore.aviso": "Te quedan %s minutos de juego hoy.",
+  "senjucore.aviso": "Te quedan %s min de juego hoy.",
   "senjucore.cmd.ver": "%s: usado %s, restante %s",
   "senjucore.cmd.reiniciar": "Tiempo de %s reiniciado: restante = límite completo.",
   "senjucore.cmd.dar": "Se dieron %s minutos a %s. Restante: %s.",

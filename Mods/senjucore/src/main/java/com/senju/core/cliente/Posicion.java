@@ -17,7 +17,13 @@ public enum Posicion {
         switch (this) {
             case ARRIBA_IZQ, ARRIBA_DER -> y = margen + despY;
             case MEDIO_IZQ, MEDIO_DER -> y = (altoPant - altoPanel) / 2 + despY;
-            default -> y = altoPant - altoPanel - margen - despY;
+            default -> {
+                y = altoPant - altoPanel - margen - despY;
+                // evitar barra rápida, corazones y hambre
+                if (x < anchoPant / 2 + 91 && x + anchoPanel > anchoPant / 2 - 91) {
+                    y = altoPant - altoPanel - 60 - despY;
+                }
+            }
         }
         return new int[] {acotar(x, anchoPant - anchoPanel), acotar(y, altoPant - altoPanel)};
     }

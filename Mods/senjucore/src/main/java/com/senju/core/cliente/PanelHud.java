@@ -21,6 +21,7 @@ public final class PanelHud implements IGuiOverlay {
     public void render(ForgeGui gui, GuiGraphics gfx, float partialTick, int w, int h) {
         Minecraft mc = Minecraft.getInstance();
         if (!ClientConfig.VISIBLE.get() || mc.options.hideGui || mc.player == null) return;
+        if (mc.options.renderDebug) return;
         if (mc.screen != null && !(mc.screen instanceof ChatScreen)) return;
 
         Font font = mc.font;
@@ -49,7 +50,7 @@ public final class PanelHud implements IGuiOverlay {
         int alto = lineas * ALTO_LINEA + 2 * PAD - 2;
 
         float escala = ClientConfig.ESCALA.get().floatValue();
-        int[] o = ClientConfig.POSICION.get().origen(Math.round(w / escala), Math.round(h / escala),
+        int[] o = ClientConfig.POSICION.get().origen((int) Math.floor(w / escala), (int) Math.floor(h / escala),
                 ancho, alto, MARGEN, ClientConfig.DESPLAZAMIENTO_X.get(), ClientConfig.DESPLAZAMIENTO_Y.get());
 
         gfx.pose().pushPose();
