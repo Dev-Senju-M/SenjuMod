@@ -40,7 +40,7 @@ public final class PanelHud implements IGuiOverlay {
             }
         }
         String hora = I18n.get("senjucore.panel.hora", Formato.hora12(LocalTime.now()));
-        String misiones = "Misiones: Pr\u00f3ximamente";
+        String misiones = I18n.get("senjucore.panel.misiones");
 
         int ancho = Math.max(font.width(servidor), 10 + font.width(nombre));
         if (tiempo != null) ancho = Math.max(ancho, font.width(tiempo));
