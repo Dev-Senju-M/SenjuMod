@@ -6,5 +6,9 @@
   "senjucore.cmd.dar": "Se dieron %s minutos a %s. Restante: %s.",
   "key.categories.senjucore": "Senju Core",
   "key.senjucore.mostrar": "Mostrar/ocultar panel",
-  "key.senjucore.posicion": "Cambiar posición del panel"
+  "key.senjucore.posicion": "Cambiar posición del panel",
+  "senjucore.panel.jugado": "Tiempo jugado hoy: %s",
+  "senjucore.panel.restante": "Tiempo restante: %s",
+  "senjucore.panel.hora": "Hora: %s",
+  "senjucore.panel.misiones": "Misiones: Próximamente"
 }

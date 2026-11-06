@@ -6,6 +6,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
@@ -32,13 +33,13 @@ public final class PanelHud implements IGuiOverlay {
         int colorTiempo = 0xFFFFFF;
         if (DatosCliente.tieneDatos()) {
             if (DatosCliente.sinLimite()) {
-                tiempo = "Tiempo jugado hoy: " + Formato.duracion(DatosCliente.usadosHoy());
+                tiempo = I18n.get("senjucore.panel.jugado", Formato.duracion(DatosCliente.usadosHoy()));
             } else {
-                tiempo = "Tiempo restante: " + Formato.duracion(DatosCliente.restantes());
+                tiempo = I18n.get("senjucore.panel.restante", Formato.duracion(DatosCliente.restantes()));
                 colorTiempo = Formato.colorTiempo(DatosCliente.restantes());
             }
         }
-        String hora = "Hora: " + Formato.hora12(LocalTime.now());
+        String hora = I18n.get("senjucore.panel.hora", Formato.hora12(LocalTime.now()));
         String misiones = "Misiones: Pr\u00f3ximamente";
 
         int ancho = Math.max(font.width(servidor), 10 + font.width(nombre));
