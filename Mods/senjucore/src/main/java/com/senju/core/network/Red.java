@@ -25,6 +25,9 @@ public final class Red {
         CANAL.registerMessage(id++, PaqueteTiempo.class, PaqueteTiempo::encode,
                 PaqueteTiempo::decode, PaqueteTiempo::handle,
                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        CANAL.registerMessage(id++, PaqueteVanish.class, PaqueteVanish::encode,
+                PaqueteVanish::decode, PaqueteVanish::handle,
+                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
 
     public static void enviarA(ServerPlayer p, Object paquete) {

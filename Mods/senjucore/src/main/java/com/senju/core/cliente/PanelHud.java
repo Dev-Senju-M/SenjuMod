@@ -21,7 +21,7 @@ import java.time.LocalTime;
 
 /** Panel HUD con los datos del jugador. Solo cliente. */
 public final class PanelHud implements IGuiOverlay {
-    private static final int PAD = 4, MARGEN = 4, FONDO = 0x80000000, GRIS = 0xAAAAAA;
+    private static final int PAD = 4, MARGEN = 4, FONDO = 0x80000000, GRIS = 0xAAAAAA, COLOR_VANISH = 0xB58BFF;
     private static final int ALTO_LINEA = 10;
     private static final Style ESTILO_PANEL = Style.EMPTY.withFont(new ResourceLocation("senjucore", "panel"));
 
@@ -69,7 +69,10 @@ public final class PanelHud implements IGuiOverlay {
         int ancho = Math.max(anchoServidor, 10 + font.width(cNombre));
         if (cTiempo != null) ancho = Math.max(ancho, font.width(cTiempo));
         ancho = Math.max(ancho, Math.max(font.width(cHora), font.width(cMisiones))) + 2 * PAD;
-        int lineas = tiempo != null ? 5 : 4;
+        boolean vanish = DatosCliente.vanish();
+        Component cVanish = vanish ? txt(I18n.get("senjucore.panel.vanish"), estilo) : null;
+        if (cVanish != null) ancho = Math.max(ancho, font.width(cVanish) + 2 * PAD);
+        int lineas = (tiempo != null ? 5 : 4) + (vanish ? 1 : 0);
         int alto = lineas * ALTO_LINEA + 2 * PAD - 2;
 
         float escala = ClientConfig.ESCALA.get().floatValue();
@@ -80,6 +83,10 @@ public final class PanelHud implements IGuiOverlay {
         gfx.pose().scale(escala, escala, 1f);
         int x = o[0] + PAD, y = o[1] + PAD;
         gfx.fill(o[0], o[1], o[0] + ancho, o[1] + alto, FONDO);
+        if (cVanish != null) {
+            if (!rgb || Efectos.parpadeoVisible(ms)) gfx.drawString(font, cVanish, x, y, COLOR_VANISH);
+            y += ALTO_LINEA;
+        }
         dibujarServidor(gfx, font, servidor, estilo, escribir, rgb, vel, ms, x, y);
         y += ALTO_LINEA;
         PlayerFaceRenderer.draw(gfx, mc.player.getSkinTextureLocation(), x, y, 8);

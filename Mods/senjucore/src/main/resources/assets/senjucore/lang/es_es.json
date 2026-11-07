@@ -19,5 +19,10 @@
   "senjucore.placa.dada": "Placa de Staff entregada a %s.",
   "senjucore.placa.yatiene": "%s ya tiene una Placa de Staff.",
   "senjucore.placa.noesstaff": "%s no es staff.",
-  "senjucore.placa.lleno": "El inventario de %s está lleno."
+  "senjucore.placa.lleno": "El inventario de %s está lleno.",
+  "senjucore.vanish.on": "Vanish activado",
+  "senjucore.vanish.off": "Vanish desactivado",
+  "senjucore.vanish.aviso.on": "%s activó Vanish",
+  "senjucore.vanish.aviso.off": "%s desactivó Vanish",
+  "senjucore.panel.vanish": "VANISH"
 }

@@ -7,6 +7,7 @@ public final class DatosCliente {
     private static long restantes = 0;
     private static long usadosHoy = 0;
     private static boolean tieneDatos = false;
+    private static boolean vanish = false;
     private static int ticks = 0;
 
     private DatosCliente() {}
@@ -16,6 +17,9 @@ public final class DatosCliente {
     public static long restantes() { return restantes; }
     public static long usadosHoy() { return usadosHoy; }
     public static boolean tieneDatos() { return tieneDatos; }
+    public static boolean vanish() { return vanish; }
+
+    public static void setVanish(boolean activo) { vanish = activo; }
 
     public static void setInfo(String nombre, long limiteSegundos, boolean sinLim) {
         nombreServidor = nombre;
@@ -44,6 +48,7 @@ public final class DatosCliente {
         restantes = 0;
         usadosHoy = 0;
         tieneDatos = false;
+        vanish = false;
         ticks = 0;
     }
 }

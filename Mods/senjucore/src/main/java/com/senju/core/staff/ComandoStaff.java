@@ -22,6 +22,11 @@ public class ComandoStaff {
     static void registrar(CommandDispatcher<CommandSourceStack> d) {
         d.register(Commands.literal("staff")
                 .requires(Staff::esStaff)
+                .then(Commands.literal("vanish")
+                        .executes(c -> {
+                            com.senju.core.staff.vanish.Vanish.alternar(c.getSource().getPlayerOrException());
+                            return 1;
+                        }))
                 .then(Commands.literal("placa")
                         .executes(c -> dar(c, c.getSource().getPlayerOrException()))
                         .then(Commands.argument("jugador", EntityArgument.player())
