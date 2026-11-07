@@ -66,5 +66,9 @@
   "senjucore.castigo.staff": "%s castigó a %s: %s (%s) — %s",
   "senjucore.castigo.perdonado.jugador": "Se te quitó el castigo: %s",
   "senjucore.castigo.perdonado.staff": "%s perdonó a %s: %s",
-  "senjucore.castigo.vencido": "Tu castigo de %s terminó."
+  "senjucore.castigo.vencido": "Tu castigo de %s terminó.",
+  "senjucore.castigo.silenciado": "Estás silenciado hasta %s. Motivo: %s",
+  "senjucore.castigo.expulsado": "Fuiste expulsado. Motivo: %s",
+  "senjucore.castigo.baneado": "Estás baneado hasta %s. Motivo: %s",
+  "senjucore.castigo.permanente": "permanente"
 }

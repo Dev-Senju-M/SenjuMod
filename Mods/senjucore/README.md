@@ -141,6 +141,16 @@ Además: su chat (también `/msg`, `/me`, `/say`, `/teammsg`) llega a los no sta
 
 Límites: las esferas de experiencia aún pueden desviarse hacia el jugador en Vanish (no las absorbe) y las flechas en el suelo pueden recogerse (rastros visibles sin tratar); no oculta de `/list`, selectores (`@a`), placas de presión, cables trampa ni sonidos de bloques. La lista de servidores del menú multijugador (número de jugadores y nombres al pasar el ratón) sigue contando e incluyendo a los jugadores en Vanish.
 
+## Castigar: efectos
+
+`EfectosCastigos` (`staff.castigos`) registra los efectos de silenciar, expulsar, banear y quitar horas:
+
+- **Silenciar**: cancela `ServerChatEvent` y los comandos `msg/tell/w/me/say/teammsg/tm` (raíz del comando, con o sin `minecraft:`) y avisa con la fecha de fin y el motivo. Solo a no staff.
+- **Expulsar**: desconecta con el motivo; no deja estado activo (solo historial).
+- **Banear**: desconecta al aplicar; al entrar, primero `procesarVencidos` y luego, si el BAN sigue activo, desconecta mostrando la fecha (`yyyy-MM-dd HH:mm`) o "permanente" y el motivo (tomado de la última entrada APLICAR del historial).
+- **Quitar horas**: normaliza el día, `ReglaTiempo.quitar` (permanente = todo el día), guarda (también sin conexión) y sincroniza; si se agota y el servidor aplica límite, expulsa con el mensaje del límite diario.
+- **Vencimientos**: cada 20 ticks y al entrar se llama a `Castigos.procesarVencidos` (avisa "Tu castigo de X terminó" una sola vez y llama a `alQuitar`).
+
 ## Estructura (`com.senju.core`)
 
 - `config`: `CommonConfig`, `ClientConfig`.
@@ -263,3 +273,11 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] S en Vanish oculta el panel con `H`: la etiqueta VANISH sigue visible sola en la esquina del panel (F1 y F3 la ocultan).
 - [ ] S en Vanish muere (`/kill`) y consigue un logro: N no ve el mensaje de muerte ni el anuncio del logro; otro staff y la consola sí.
 - [ ] S en Vanish junto a esferas de experiencia: no las absorbe (pueden acercarse); al salir de Vanish las recoge.
+
+### Castigos: efectos (S staff, N no staff; aplicar con la API/consola hasta que existan los comandos de la Task 4)
+- [ ] N silenciado 1 h: escribe en el chat y usa `/msg S hola`, `/me x`, `/say x`: no sale nada y N ve "Estás silenciado hasta <fecha>. Motivo: ...". S silenciado no queda afectado.
+- [ ] N silenciado 1 m: al pasar el minuto N ve "Tu castigo de Silenciar terminó." (una sola vez) y puede escribir.
+- [ ] Expulsar a N: se desconecta con el motivo y puede volver a entrar de inmediato.
+- [ ] Banear a N 1 h (conectado): se desconecta con "baneado hasta <fecha>"; al reintentar entrar lo vuelve a expulsar con fecha y motivo. Banear permanente: dice "permanente".
+- [ ] Banear a N (desconectado) y que entre: expulsado al entrar. Ban de 1 m vencido estando desconectado: al entrar puede jugar y ve "Tu castigo de Banear terminó.".
+- [ ] Quitar 30 m a N (con límite activo en servidor dedicado): el panel baja 30 m. "Todo el día" lo expulsa con el mensaje del límite. Con N desconectado se aplica al entrar.

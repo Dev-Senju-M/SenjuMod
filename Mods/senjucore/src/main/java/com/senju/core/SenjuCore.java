@@ -39,6 +39,8 @@ public class SenjuCore {
         MinecraftForge.EVENT_BUS.register(new com.senju.core.staff.vanish.Vanish());
         MinecraftForge.EVENT_BUS.register(new com.senju.core.staff.vanish.EventosVanish());
         MinecraftForge.EVENT_BUS.register(new com.senju.core.tiempo.ComandoTiempo());
+        com.senju.core.staff.castigos.EfectosCastigos.registrarEfectos();
+        MinecraftForge.EVENT_BUS.register(new com.senju.core.staff.castigos.EfectosCastigos());
         LOGGER.info("Senju Core cargado");
     }
 }
