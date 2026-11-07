@@ -30,7 +30,12 @@ public final class Prohibidos {
             staff.sendSystemMessage(Component.translatable("senjucore.prohibidos.noplaca"));
             return false;
         }
-        if (!RegistroProhibidos.de(staff.server).agregar(id(ejemplo.getItem()))) return false;
+        if (!RegistroProhibidos.de(staff.server).agregar(id(ejemplo.getItem()))) {
+            // Barra de acción: un shift+doble clic envía varios QUICK_MOVE seguidos.
+            staff.displayClientMessage(Component.translatable("senjucore.prohibidos.yaesta",
+                    new ItemStack(ejemplo.getItem()).getHoverName()), true);
+            return false;
+        }
         avisar(staff, "senjucore.prohibidos.agregado", new ItemStack(ejemplo.getItem()).getHoverName());
         return true;
     }

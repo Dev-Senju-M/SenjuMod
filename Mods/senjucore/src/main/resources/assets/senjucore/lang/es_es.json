@@ -36,6 +36,7 @@
   "senjucore.prohibidos.agregado": "%s prohibió: %s",
   "senjucore.prohibidos.quitado": "%s permitió: %s",
   "senjucore.prohibidos.noplaca": "La Placa de Staff no se puede prohibir.",
+  "senjucore.prohibidos.yaesta": "%s ya está prohibido.",
   "senjucore.confiscado.jugador": "Se te quitó un objeto prohibido: %s x%s",
   "senjucore.confiscado.staff": "Se confiscó a %s: %s x%s",
   "senjucore.menu.prohibidos": "Objetos prohibidos",

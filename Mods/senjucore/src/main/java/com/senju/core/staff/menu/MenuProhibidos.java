@@ -33,8 +33,8 @@ import net.minecraftforge.registries.ForgeRegistries;
  *   <li>las casillas del menú son {@link SlotFijo} ({@code mayPlace} y {@code mayPickup} siempre false), así
  *       la lógica vanilla nunca coloca ni toma nada en ellas;</li>
  *   <li>{@link #clicked} solo llama a {@code super} para slots del inventario del jugador y solo con
- *       PICKUP, SWAP (botón 0-8 o 40: ambos lados son del jugador), PICKUP_ALL y THROW; QUICK_CRAFT
- *       (arrastre), CLONE, clics fuera de la ventana y cualquier tipo sobre una casilla del menú nunca
+ *       PICKUP, SWAP (botón 0-8 o 40: ambos lados son del jugador) y PICKUP_ALL; THROW (nunca se suelta
+ *       nada al suelo), QUICK_CRAFT (arrastre), CLONE, clics fuera de la ventana y cualquier tipo sobre una casilla del menú nunca
  *       llegan a {@code super};</li>
  *   <li>{@link #quickMoveStack} no mueve nada (shift-clic agrega a la lista sin mover el ítem).</li>
  * </ul>
@@ -153,12 +153,11 @@ public class MenuProhibidos extends AbstractContainerMenu {
                     super.clicked(slotId, button, tipo, player);
                 }
             }
-            case PICKUP_ALL, THROW -> {
-                // PICKUP_ALL: las casillas del menú no dejan tomar (SlotFijo + canTakeItemForPickAll).
-                // THROW: el staff suelta su propio ítem como en vanilla (ProteccionPlaca protege la Placa).
+            case PICKUP_ALL -> {
+                // Doble clic: las casillas del menú no dejan tomar (SlotFijo + canTakeItemForPickAll).
                 if (enJugador) super.clicked(slotId, button, tipo, player);
             }
-            default -> { } // QUICK_CRAFT (arrastre) y CLONE: ignorados
+            default -> { } // THROW (nunca se suelta nada al suelo), QUICK_CRAFT (arrastre) y CLONE: ignorados
         }
         reconstruir();
         // El cursor no se limpia (es el ítem real del staff); se resincroniza todo con el cliente.

@@ -113,9 +113,12 @@ Panel > Objetos prohibidos (slot 19) abre `MenuProhibidos` ("Objetos prohibidos"
 
 - **Agregar:** toma el ítem de tu inventario y haz clic (izquierdo o derecho) en cualquier casilla 0-44, o shift+clic sobre el ítem en tu inventario. Se agrega el **tipo**; el ítem no se mueve ni se gasta (se queda en el cursor o en su slot). La Placa de Staff no se puede agregar.
 - **Quitar:** clic con el cursor vacío sobre un ítem de la lista.
+- Si el tipo ya estaba en la lista, la barra de acción muestra "Diamante ya está prohibido."
 - Agregar/quitar avisa a todo el staff conectado ("S prohibió: Diamante" / "S permitió: Diamante").
 
-A diferencia de `MenuSoloLectura`, este menú extiende `AbstractContainerMenu` directamente (mismo orden de slots que `ChestMenu`) porque el cursor es el ítem real del staff y no se limpia. Nada entra ni sale de las casillas del menú: son `SlotFijo` (`mayPlace` y `mayPickup` = false), `canTakeItemForPickAll`/`canDragTo` = false para ellas, `quickMoveStack` no mueve nada, y `clicked` solo llama a `super` para slots del inventario del jugador con PICKUP, SWAP (teclas 1-9/F), PICKUP_ALL (doble clic) y THROW (Q). Arrastre (QUICK_CRAFT), clic central (CLONE), clics fuera de la ventana y cualquier otro tipo sobre las casillas del menú se ignoran. Tras cada clic, `sendAllDataToRemote()`.
+A diferencia de `MenuSoloLectura`, este menú extiende `AbstractContainerMenu` directamente (mismo orden de slots que `ChestMenu`) porque el cursor es el ítem real del staff y no se limpia. Nada entra ni sale de las casillas del menú: son `SlotFijo` (`mayPlace` y `mayPickup` = false), `canTakeItemForPickAll`/`canDragTo` = false para ellas, `quickMoveStack` no mueve nada, y `clicked` solo llama a `super` para slots del inventario del jugador con PICKUP, SWAP (teclas 1-9/F) y PICKUP_ALL (doble clic). Soltar con Q/Ctrl+Q (THROW; nunca se suelta nada al suelo), arrastre (QUICK_CRAFT), clic central (CLONE), clics fuera de la ventana y cualquier otro tipo sobre las casillas del menú se ignoran. Tras cada clic, `sendAllDataToRemote()`.
+
+Límite (vanilla): si cierras el menú con un ítem en el cursor y el inventario lleno (o al morir/desconectarte con él en el cursor), `removed()` de vanilla lo suelta al suelo, igual que con cualquier cofre.
 
 ## Vanish
 
@@ -224,7 +227,8 @@ Arranca `runServer` y `runClient` y entra a `localhost`.
 - [ ] Shift+clic sobre un diamante (o cualquier ítem) del inventario de S: se agrega a la lista y el ítem no se mueve.
 - [ ] Clic con el cursor vacío sobre el diamante de la lista: desaparece, "S permitió: Diamante".
 - [ ] Con un ítem en el cursor, clic en Volver/Anterior/Siguiente/cristal: el ítem no se pierde (Volver lo devuelve al inventario al abrir el Panel).
-- [ ] S mueve sus propios ítems con clic, teclas 1-9, F y doble clic dentro de su inventario; nada entra ni sale de las casillas de la lista con: clic, shift+clic, arrastre (clic mantenido) sobre la lista o el inventario, teclas 1-9 y F sobre una casilla de la lista, doble clic sobre la lista, clic central (creativo), clic fuera de la ventana (no suelta nada).
+- [ ] S mueve sus propios ítems con clic, teclas 1-9, F y doble clic dentro de su inventario; nada entra ni sale de las casillas de la lista con: clic, shift+clic, arrastre (clic mantenido) sobre la lista o el inventario, teclas 1-9 y F sobre una casilla de la lista, doble clic sobre la lista, clic central (creativo), clic fuera de la ventana y Q/Ctrl+Q sobre su inventario (no suelta nada).
+- [ ] Agregar de nuevo un tipo ya listado: "Diamante ya está prohibido." en la barra de acción, sin aviso al staff.
 - [ ] Intentar agregar la Placa (clic con ella en el cursor y shift+clic): "La Placa de Staff no se puede prohibir." y la Placa sigue intacta.
 - [ ] 46 tipos prohibidos: dos páginas; Siguiente/Anterior solo cuando existen; quitar el único ítem de la página 2 regresa a la página 1.
 - [ ] Dos staff con el menú abierto: lo que agrega uno aparece al otro en <= 1 s. Reiniciar el servidor: la lista se conserva.
