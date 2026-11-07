@@ -53,5 +53,18 @@
   "senjucore.menu.quitar": "Clic para permitir de nuevo",
   "senjucore.menu.marcaprohibido": "⚠ Objeto prohibido",
   "senjucore.menu.placa": "Placa de Staff",
-  "senjucore.verinv.desconectado": "%s se desconectó."
+  "senjucore.verinv.desconectado": "%s se desconectó.",
+  "senjucore.castigo.esstaff": "El staff no puede ser castigado.",
+  "senjucore.castigo.sincarcel": "No hay cárcel fijada. Usa /staff carcel fijar.",
+  "senjucore.castigo.tipo.silencio": "Silenciar",
+  "senjucore.castigo.tipo.expulsion": "Expulsar",
+  "senjucore.castigo.tipo.ban": "Banear",
+  "senjucore.castigo.tipo.congelar": "Congelar",
+  "senjucore.castigo.tipo.carcel": "Cárcel",
+  "senjucore.castigo.tipo.quitar_horas": "Quitar horas",
+  "senjucore.castigo.jugador": "Recibiste un castigo: %s (%s). Motivo: %s",
+  "senjucore.castigo.staff": "%s castigó a %s: %s (%s) — %s",
+  "senjucore.castigo.perdonado.jugador": "Se te quitó el castigo: %s",
+  "senjucore.castigo.perdonado.staff": "%s perdonó a %s: %s",
+  "senjucore.castigo.vencido": "Tu castigo de %s terminó."
 }

@@ -28,6 +28,13 @@ public final class ReglaTiempo {
         return new EstadoTiempo(e.dia(), Math.max(0, e.usados() - minutos * 60));
     }
 
+    /** Resta tiempo del día: usados += minutos*60 sin pasar del límite; minutos < 0 = todo el día. */
+    public static EstadoTiempo quitar(EstadoTiempo e, long minutos, long limiteSeg) {
+        if (minutos < 0) return new EstadoTiempo(e.dia(), Math.max(e.usados(), limiteSeg));
+        long nuevo = Math.min(limiteSeg, e.usados() + minutos * 60);
+        return new EstadoTiempo(e.dia(), Math.max(e.usados(), nuevo));
+    }
+
     /** Aviso m con restantesAntes > m*60 >= restantesDespues; si varios, el menor. */
     public static OptionalInt avisoCruzado(long restantesAntes, long restantesDespues, List<Integer> avisosMin) {
         return avisosMin.stream()

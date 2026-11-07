@@ -51,4 +51,19 @@ class ReglaTiempoTest {
     @Test void limiteSeisHoras() {
         assertEquals(21600, ReglaTiempo.limiteSegundos(6.0));
     }
+    @Test void quitarSuma() {
+        assertEquals(1800 + 100, ReglaTiempo.quitar(new EstadoTiempo(100, 100), 30, LIMITE).usados());
+    }
+    @Test void quitarTopeAlLimite() {
+        assertEquals(LIMITE, ReglaTiempo.quitar(new EstadoTiempo(100, LIMITE - 60), 30, LIMITE).usados());
+    }
+    @Test void quitarTodoElDia() {
+        EstadoTiempo r = ReglaTiempo.quitar(new EstadoTiempo(100, 5), -1, LIMITE);
+        assertEquals(LIMITE, r.usados());
+        assertEquals(100, r.dia());
+        assertTrue(ReglaTiempo.agotado(r, LIMITE));
+    }
+    @Test void quitarNoBajaUsadosSiYaExcedido() {
+        assertEquals(LIMITE + 500, ReglaTiempo.quitar(new EstadoTiempo(100, LIMITE + 500), 30, LIMITE).usados());
+    }
 }

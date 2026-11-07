@@ -11,6 +11,7 @@ public final class CommonConfig {
     public static final ForgeConfigSpec.BooleanValue EXIMIR_OPERADORES;
     public static final ForgeConfigSpec.BooleanValue STAFF_INCLUYE_OPERADORES;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> STAFF;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> MOTIVOS;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -26,6 +27,9 @@ public final class CommonConfig {
                 .define("staffIncluyeOperadores", true);
         STAFF = b.comment("Nombres de jugadores que cuentan como staff (sin distinguir mayusculas)")
                 .defineList("staff", List.of(), o -> o instanceof String);
+        MOTIVOS = b.comment("Motivos predefinidos para los castigos (botones del panel)")
+                .defineList("motivos", List.of("Lenguaje ofensivo", "Spam", "Hacks o trampas", "Grief", "Acoso", "Otro"),
+                        o -> o instanceof String s && !s.isBlank());
         SPEC = b.build();
     }
 
