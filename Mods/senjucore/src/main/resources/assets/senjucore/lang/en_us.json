@@ -33,7 +33,6 @@
   "senjucore.menu.vanish.on": "Vanish: activado",
   "senjucore.menu.vanish.off": "Vanish: desactivado",
   "senjucore.menu.vanish.desc": "Clic para alternar",
-  "senjucore.menu.proximamente": "Próximamente",
   "senjucore.prohibidos.agregado": "%s prohibió: %s",
   "senjucore.prohibidos.quitado": "%s permitió: %s",
   "senjucore.prohibidos.noplaca": "La Placa de Staff no se puede prohibir.",

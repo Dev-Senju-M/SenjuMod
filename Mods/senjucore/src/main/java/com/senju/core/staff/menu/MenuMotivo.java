@@ -49,7 +49,7 @@ public class MenuMotivo extends MenuSoloLectura {
         for (String s : CommonConfig.MOTIVOS.get()) {
             if (s != null && !s.isBlank()) r.add(s);
         }
-        if (r.isEmpty()) r.add(Component.translatable("senjucore.menu.castigo.motivo.otro").getString());
+        if (r.isEmpty()) r.add("Otro");
         return r;
     }
 
@@ -74,7 +74,7 @@ public class MenuMotivo extends MenuSoloLectura {
             int idx = pagina * POR_PAGINA + i;
             if (idx >= motivos.size()) break;
             contenedor.setItem(i, BotonesMenu.botonLore(new ItemStack(Items.PAPER),
-                    BotonesMenu.nombreComp(Component.literal(motivos.get(idx)), ChatFormatting.WHITE), List.of()));
+                    BotonesMenu.nombreComp(Component.literal(MenuConfirmar.recortar(motivos.get(idx))), ChatFormatting.WHITE), List.of()));
         }
         contenedor.setItem(SLOT_VOLVER, BotonesMenu.volver());
         if (pagina > 0) contenedor.setItem(SLOT_ANTERIOR, BotonesMenu.anterior());

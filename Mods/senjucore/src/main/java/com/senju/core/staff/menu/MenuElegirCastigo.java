@@ -64,9 +64,9 @@ public class MenuElegirCastigo extends MenuSoloLectura {
             List<Component> lore = List.of();
             if (t.tieneDuracion() && Castigos.activo(staff.server, objetivo.getId(), t)) {
                 long vence = Castigos.vence(staff.server, objetivo.getId(), t);
-                String resto = vence == Duracion.PERMANENTE
-                        ? Component.translatable("senjucore.castigo.permanente").getString()
-                        : Duracion.formatoRestante(ahora, vence);
+                Component resto = vence == Duracion.PERMANENTE
+                        ? Component.translatable("senjucore.castigo.permanente")
+                        : Component.literal(Duracion.formatoRestante(ahora, vence));
                 lore = List.of(BotonesMenu.nombreComp(
                         Component.translatable("senjucore.menu.castigo.activo", resto), ChatFormatting.RED));
             }

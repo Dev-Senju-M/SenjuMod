@@ -66,6 +66,11 @@ public class MenuConfirmar extends MenuSoloLectura {
         return Component.literal(Duracion.formatoDuracion(ms));
     }
 
+    /** Recorta un motivo largo solo para mostrarlo (40 caracteres + puntos suspensivos). */
+    static String recortar(String s) {
+        return s.length() > 40 ? s.substring(0, 40) + "…" : s;
+    }
+
     private void construir() {
         for (int i = 0; i < contenedor.getContainerSize(); i++) contenedor.setItem(i, BotonesMenu.relleno());
         ItemStack resumen = BotonesMenu.botonLore(BotonesMenu.cabeza(objetivo),
@@ -74,7 +79,7 @@ public class MenuConfirmar extends MenuSoloLectura {
                 List.of(Component.translatable("senjucore.menu.castigo.lore.castigo",
                                 Component.translatable("senjucore.castigo.tipo." + castigo.clave())),
                         Component.translatable("senjucore.menu.castigo.lore.duracion", textoDuracion(castigo, duracion)),
-                        Component.translatable("senjucore.menu.castigo.lore.motivo", motivo)));
+                        Component.translatable("senjucore.menu.castigo.lore.motivo", recortar(motivo))));
         contenedor.setItem(SLOT_RESUMEN, resumen);
         contenedor.setItem(SLOT_APLICAR, BotonesMenu.aplicar());
         contenedor.setItem(SLOT_CANCELAR, BotonesMenu.cancelar());
@@ -87,12 +92,15 @@ public class MenuConfirmar extends MenuSoloLectura {
         switch (slot) {
             case SLOT_APLICAR -> {
                 aplicado = true;
-                Castigos.Resultado r = Castigos.aplicar(sp, objetivo, castigo, duracion, motivo);
-                if (r == Castigos.Resultado.SIN_CARCEL) {
-                    sp.displayClientMessage(Component.translatable("senjucore.castigo.sincarcel"), true);
+                try {
+                    Castigos.Resultado r = Castigos.aplicar(sp, objetivo, castigo, duracion, motivo);
+                    if (r == Castigos.Resultado.SIN_CARCEL) {
+                        sp.displayClientMessage(Component.translatable("senjucore.castigo.sincarcel"), true);
+                    }
+                } finally {
+                    // OK, ES_STAFF y VETADO: de vuelta al panel (ES_STAFF ya aviso al actor desde Castigos).
+                    MenuStaff.abrir(sp);
                 }
-                // OK, ES_STAFF y VETADO: de vuelta al panel (ES_STAFF ya aviso al actor desde Castigos).
-                MenuStaff.abrir(sp);
                 return false;
             }
             case SLOT_CANCELAR -> {

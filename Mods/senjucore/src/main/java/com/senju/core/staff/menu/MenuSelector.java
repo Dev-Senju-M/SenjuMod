@@ -29,6 +29,7 @@ public class MenuSelector extends MenuSoloLectura {
     private int pagina;
     /** UUID mostrado en cada slot de cabeza de la página actual (coincide con lo que ve el staff). */
     private final List<UUID> mostrados = new ArrayList<>();
+    private final List<String> nombres = new ArrayList<>();
 
     private MenuSelector(int id, Inventory inv, Container c, int pagina, Modo modo) {
         super(id, inv, c, FILAS);
@@ -56,12 +57,14 @@ public class MenuSelector extends MenuSoloLectura {
         pagina = Paginacion.acotar(pagina, todos.size(), POR_PAGINA);
         int total = Paginacion.totalPaginas(todos.size(), POR_PAGINA);
         mostrados.clear();
+        nombres.clear();
         for (int i = 0; i < contenedor.getContainerSize(); i++) contenedor.setItem(i, BotonesMenu.relleno());
         for (int i = 0; i < POR_PAGINA; i++) {
             int idx = pagina * POR_PAGINA + i;
             if (idx >= todos.size()) break;
             ServerPlayer p = todos.get(idx);
             mostrados.add(p.getUUID());
+            nombres.add(p.getGameProfile().getName());
             contenedor.setItem(i, BotonesMenu.cabeza(p.getGameProfile()));
         }
         contenedor.setItem(SLOT_VOLVER, BotonesMenu.volver());
@@ -79,7 +82,7 @@ public class MenuSelector extends MenuSoloLectura {
     protected boolean alClicar(int slot, ClickType tipo, ServerPlayer sp) {
         if (slot < POR_PAGINA) {
             if (slot < mostrados.size()) {
-                if (modo == Modo.CASTIGAR) return elegirParaCastigo(sp, mostrados.get(slot));
+                if (modo == Modo.CASTIGAR) return elegirParaCastigo(sp, mostrados.get(slot), nombres.get(slot));
                 MenuVerInventario.abrir(sp, mostrados.get(slot), pagina);
                 return false;
             }
@@ -97,10 +100,10 @@ public class MenuSelector extends MenuSoloLectura {
     }
 
     /** Modo castigar: el staff no se puede castigar (aviso en la barra y no abre nada). */
-    private boolean elegirParaCastigo(ServerPlayer sp, UUID id) {
+    private boolean elegirParaCastigo(ServerPlayer sp, UUID id, String nombre) {
         ServerPlayer t = sp.server.getPlayerList().getPlayer(id);
         if (t == null) {
-            sp.displayClientMessage(Component.translatable("senjucore.verinv.desconectado", "?"), true);
+            sp.displayClientMessage(Component.translatable("senjucore.verinv.desconectado", nombre), true);
             return refrescar(sp);
         }
         if (Castigos.esStaff(sp.server, t.getGameProfile())) {
