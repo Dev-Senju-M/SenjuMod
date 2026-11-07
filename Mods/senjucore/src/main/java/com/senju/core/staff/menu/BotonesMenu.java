@@ -53,7 +53,7 @@ public final class BotonesMenu {
 
     public static ItemStack inventario() {
         return boton(new ItemStack(Items.CHEST), nombre("senjucore.menu.inventario", ChatFormatting.AQUA),
-                "senjucore.menu.proximamente");
+                "senjucore.menu.inventario.desc");
     }
 
     public static ItemStack cerrar() {

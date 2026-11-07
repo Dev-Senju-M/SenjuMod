@@ -59,8 +59,7 @@ public abstract class MenuSoloLectura extends ChestMenu {
                 && slotId >= 0 && slotId < contenedor.getContainerSize()) {
             if (!alClicar(slotId, type, sp)) return;
         }
-        // Deshace cualquier predicción del cliente (cursor, slots propios).
-        if (!getCarried().isEmpty()) setCarried(ItemStack.EMPTY);
+        // Deshace cualquier predicción del cliente. El cursor del servidor no se toca (puede ser una Placa pendiente).
         if (player instanceof ServerPlayer) sendAllDataToRemote();
     }
 

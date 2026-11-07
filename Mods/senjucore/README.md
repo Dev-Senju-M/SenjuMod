@@ -116,6 +116,8 @@ Panel > Objetos prohibidos (slot 19) abre `MenuProhibidos` ("Objetos prohibidos"
 - Si el tipo ya estaba en la lista, la barra de acción muestra "Diamante ya está prohibido."
 - Agregar/quitar avisa a todo el staff conectado ("S prohibió: Diamante" / "S permitió: Diamante").
 
+Confiscación (`Confiscacion`, solo no staff): cada 20 ticks, al recoger un ítem y al desconectarse se borran los objetos prohibidos del inventario, armadura, mano secundaria, cursor, cofre de ender y rejillas de crafteo (la 2x2 y la entrada de mesa de crafteo, yunque, herrería, afilador, cortapiedras, telar, cartografía y encantamiento; los slots de resultado se ignoran). Tirar un objeto prohibido (Q, arrastrar fuera) cancela el evento, y al morir se retiran de los drops: nunca llega al suelo. Cada confiscación se anota en `logs/senjucore-confiscados.log` con el origen: `inventario`, `armadura`, `mano_secundaria`, `cursor`, `ender`, `crafteo`, `tirado` o `muerte`. Si el objeto prohibido es un contenedor (p. ej. una shulker box), se borra con todo su contenido y solo se registra el contenedor.
+
 A diferencia de `MenuSoloLectura`, este menú extiende `AbstractContainerMenu` directamente (mismo orden de slots que `ChestMenu`) porque el cursor es el ítem real del staff y no se limpia. Nada entra ni sale de las casillas del menú: son `SlotFijo` (`mayPlace` y `mayPickup` = false), `canTakeItemForPickAll`/`canDragTo` = false para ellas, `quickMoveStack` no mueve nada, y `clicked` solo llama a `super` para slots del inventario del jugador con PICKUP, SWAP (teclas 1-9/F) y PICKUP_ALL (doble clic). Soltar con Q/Ctrl+Q (THROW; nunca se suelta nada al suelo), arrastre (QUICK_CRAFT), clic central (CLONE), clics fuera de la ventana y cualquier otro tipo sobre las casillas del menú se ignoran. Tras cada clic, `sendAllDataToRemote()`.
 
 Límite (vanilla): si cierras el menú con un ítem en el cursor y el inventario lleno (o al morir/desconectarte con él en el cursor), `removed()` de vanilla lo suelta al suelo, igual que con cualquier cofre.
@@ -234,6 +236,10 @@ Arranca `runServer` y `runClient` y entra a `localhost`.
 - [ ] Dos staff con el menú abierto: lo que agrega uno aparece al otro en <= 1 s. Reiniciar el servidor: la lista se conserva.
 - [ ] Staff en modo espectador: abre el menú pero los clics no hacen nada (limitación vanilla).
 - [ ] N con diamantes en el inventario, armadura/mano secundaria, cursor y cofre de ender: se le quitan en <= 1 s, sin ítems en el suelo, con aviso a N y al staff; línea en `logs/senjucore-confiscados.log`. S (staff) conserva sus diamantes.
+- [ ] N sale del juego con un diamante en el cursor (menú abierto): al reentrar no hay diamante y no hay ítem en el suelo; el log tiene origen `cursor`.
+- [ ] N pone un diamante en la rejilla de crafteo 2x2 (o en un yunque) y cierra o sale: se confisca (origen `crafteo`), sin ítem en el suelo.
+- [ ] N intenta tirar un diamante con Q (o arrastrándolo fuera): desaparece sin entidad en el suelo, con aviso y línea `tirado` en el log.
+- [ ] N muere con un diamante (p. ej. recogido justo antes): no aparece en los drops; línea `muerte` en el log. Con una shulker box prohibida con cosas dentro: se borra todo y el log solo menciona la shulker.
 
 ### Vanish (hacen falta dos jugadores)
 
