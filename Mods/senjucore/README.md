@@ -68,6 +68,13 @@ Las cuatro opciones de efectos están en `senjucore-client.toml` (tabla anterior
 
 Funcionan también con jugadores desconectados (por ejemplo, uno ya expulsado por agotar su tiempo).
 
+### Comandos de staff (`/staff ...`, solo staff)
+
+- `/staff perdonar <jugador> [silencio|ban|congelar|carcel]`: quita los castigos activos (todos o solo el indicado). Responde "Perdonado: X" o "X no tenía castigos activos". Funciona con desconectados (por perfil). Expulsar y Quitar horas no tienen estado que perdonar.
+- `/staff historial <jugador>`: últimos 10 registros, del más reciente: `yyyy-MM-dd HH:mm · <acción> <tipo> (<duración>) · <motivo> · por <staff>`; sin registros: "Sin historial".
+- `/staff carcel fijar`: fija la cárcel en tu posición (dimensión, xyz y rotación). Solo jugadores (la consola recibe error).
+- `/staff banear <jugador> <duración> <motivo...>`: banea también a desconectados y desde la consola. Duración `10m`, `1h`, `1d`, `7d` o `perm` (`<n>m|h|d`); si es inválida muestra los ejemplos. El motivo es texto libre. No se puede banear a staff.
+
 ## Comportamiento
 
 - Servidor: el tiempo restante baja cada segundo, avisa en `avisosMinutos` y expulsa al llegar a 0.
@@ -291,7 +298,7 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] S en Vanish muere (`/kill`) y consigue un logro: N no ve el mensaje de muerte ni el anuncio del logro; otro staff y la consola sí.
 - [ ] S en Vanish junto a esferas de experiencia: no las absorbe (pueden acercarse); al salir de Vanish las recoge.
 
-### Castigos: efectos (S staff, N no staff; aplicar con la API/consola hasta que existan los comandos de la Task 4)
+### Castigos: efectos (S staff, N no staff; aplicar desde el panel o con `/staff banear`)
 - [ ] N silenciado 1 h: escribe en el chat y usa `/msg S hola`, `/me x`, `/say x`: no sale nada y N ve "Estás silenciado hasta <fecha>. Motivo: ...". S silenciado no queda afectado.
 - [ ] N silenciado 1 m: al pasar el minuto N ve "Tu castigo de Silenciar terminó." (una sola vez) y puede escribir.
 - [ ] Expulsar a N: se desconecta con el motivo y puede volver a entrar de inmediato.
@@ -336,3 +343,15 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] Encarcelar a N desconectado: al entrar va a la cárcel; al terminar vuelve a donde había entrado.
 - [ ] N congelado y preso: queda en la cárcel, congelado. Perdonar solo la cárcel: vuelve a su posición y sigue congelado allí.
 - [ ] Reiniciar el servidor con N preso / congelado: el estado sigue al entrar.
+
+### Castigar: comandos y recorrido completo (S staff, N no staff, T otro staff)
+- [ ] Un no staff no ve ni puede ejecutar `/staff perdonar|historial|carcel|banear` (sin permiso).
+- [ ] `/staff carcel fijar` desde la consola: error de "solo jugador". Como S: "Cárcel fijada en <dimensión> (x, y, z)"; reiniciar el servidor conserva la cárcel.
+- [ ] `/staff banear N 10m Spam` (N conectado): N se desconecta con fecha y motivo; el staff conectado ve el aviso; `/staff historial N` lo lista.
+- [ ] `/staff banear Fantasma 1h Grief` con un jugador desconectado (o desde la consola): lo banea; al entrar lo rechaza. Con `perm` dice "permanente".
+- [ ] `/staff banear N 5x algo` y `/staff banear N 0m algo`: "Duración inválida" con ejemplos. Banear a T (staff): "El staff no puede ser castigado".
+- [ ] `/staff perdonar N` con varios castigos: quita todos ("Perdonado: N"); repetir: "N no tenía castigos activos". `/staff perdonar N ban` solo quita el ban. Funciona con N desconectado.
+- [ ] `/staff perdonar N expulsion` no existe como opción (autocompletado solo silencio, ban, congelar, carcel).
+- [ ] `/staff historial N` muestra aplicar, perdonar y vencer, del más reciente, máximo 10; sin registros: "Sin historial". Texto en español, igual con idioma inglés.
+- [ ] Recorrido completo: fijar cárcel, castigar a N desde el panel con cada uno de los 6 castigos, verificar efecto, perdonar con el comando, revisar `logs/senjucore-castigos.log` (una línea por acción, sin saltos raros en motivos).
+- [ ] Todo sobrevive a reiniciar el servidor (silencio, ban, congelado, cárcel, historial).

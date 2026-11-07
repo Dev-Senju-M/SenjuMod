@@ -93,5 +93,14 @@
   "senjucore.menu.castigo.dur.perm": "Permanente",
   "senjucore.menu.castigo.dur.30m": "30 minutos",
   "senjucore.menu.castigo.dur.2h": "2 horas",
-  "senjucore.menu.castigo.dur.todo": "Todo el día"
+  "senjucore.menu.castigo.dur.todo": "Todo el día",
+  "senjucore.comando.perdonado": "Perdonado: %s",
+  "senjucore.comando.sinperdon": "%s no tenía castigos activos",
+  "senjucore.comando.historial.vacio": "Sin historial: %s",
+  "senjucore.comando.historial.titulo": "Historial de %s (últimos 10, del más reciente)",
+  "senjucore.comando.historial.linea": "%s · %s %s (%s) · %s · por %s",
+  "senjucore.comando.carcel.fijada": "Cárcel fijada en %s (%s, %s, %s)",
+  "senjucore.comando.banear.duracion": "Duración inválida: %s. Ejemplos: 10m, 1h, 1d, 7d, perm",
+  "senjucore.comando.banear.ok": "Baneado %s (%s): %s",
+  "senjucore.comando.banear.fallo": "No se pudo banear a %s."
 }
