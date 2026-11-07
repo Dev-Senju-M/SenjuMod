@@ -155,13 +155,13 @@ Límites: las esferas de experiencia aún pueden desviarse hacia el jugador en V
 
 `CongelarYCarcel` (`staff.castigos`) registra los efectos de CONGELAR y CARCEL; la geometría pura está en `ReglaPosicion` (radio de cárcel 8 horizontal y vertical, tolerancia del congelado 0.1).
 
-- **Congelar**: al aplicar (conectado) guarda la posición (`posCongelado`, dimensión + xyz + rotación); si estaba desconectado se fija donde aparece al entrar. Cada tick del jugador (servidor), si se movió más de 0.1 o cambió de dimensión, vuelve a su punto (la cabeza gira libre: rotación relativa), se anula la caída y se corta el vuelo con élitros. Cancela romper, colocar, atacar, clic derecho en bloque/ítem, clic izquierdo en bloque, interactuar con entidades, montar, perlas de ender, fruta coral y portales; cierra cualquier contenedor que se abra. Puede hablar y mirar. Barra de acción "Estás congelado" cada segundo.
-- **Cárcel**: sin cárcel fijada (o con su dimensión desaparecida) `Castigos.aplicar` devuelve `SIN_CARCEL` y no se registra nada. Al aplicar guarda la posición de retorno (`retornoCarcel`; si ya existía, se conserva la original) y lo lleva al centro. Cada tick, fuera del radio 8 o en otra dimensión vuelve al centro ("No puedes salir de la cárcel."). Cancela romper/colocar, perlas, fruta coral, portales y **todos** los comandos ("Estás en la cárcel: no puedes usar comandos."); el chat sí. Al reaparecer o cambiar de dimensión, de vuelta a la cárcel. Al terminar (perdón o vencimiento) vuelve al retorno (al spawn del mundo si esa dimensión ya no existe).
+- **Congelar**: al aplicar (conectado y vivo) guarda la posición (`posCongelado`, dimensión + xyz + rotación); si estaba desconectado o muerto se fija donde aparece al entrar o al reaparecer. Cada tick del jugador (servidor), si se movió más de 0.1 o cambió de dimensión, vuelve a su punto (la cabeza gira libre: rotación relativa), se anula la caída y se corta el vuelo con élitros. Cancela romper, colocar, atacar, clic derecho en bloque/ítem, clic izquierdo en bloque, interactuar con entidades, montar, cubos, perlas de ender, fruta coral y portales; cierra cualquier contenedor que se abra. Puede hablar y mirar. Barra de acción "Estás congelado" cada segundo. **No recibe ataques** (`LivingAttackEvent` cancelado: mobs, jugadores, lava, caída...), salvo el daño que ignora la invulnerabilidad (vacío, `/kill`), porque no puede defenderse. Si muere igualmente (sin estar preso), queda congelado donde reaparece (evita un bucle de muertes en un punto letal).
+- **Cárcel**: sin cárcel fijada (o con su dimensión desaparecida) `Castigos.aplicar` devuelve `SIN_CARCEL` y no se registra nada. Al aplicar guarda la posición de retorno (`retornoCarcel`; si ya existía, se conserva la original) y lo lleva al centro. Cada tick, fuera del radio 8 o en otra dimensión vuelve al centro ("No puedes salir de la cárcel."). Cancela romper/colocar, cubos (`FillBucketEvent` y clic derecho con cubo: ni vaciar ni recoger agua/lava), perlas, fruta coral, portales y **todos** los comandos ("Estás en la cárcel: no puedes usar comandos."); el chat sí. Al cambiar de dimensión, de vuelta a la cárcel; al reaparecer, en el primer tick (no dentro de `PlayerRespawnEvent`, donde la conexión aún apunta a la entidad vieja). Los traslados del login y de la reaparición no muestran el aviso de fuga; el aviso solo sale si hubo teletransporte. Al terminar (perdón o vencimiento) vuelve al retorno (al spawn del mundo si esa dimensión ya no existe).
 - **Desconectado**: un perdón/vencimiento sin conexión deja `retornoCarcel` guardado; al entrar (o en el primer tick/reaparición vivo) se devuelve al jugador y se borra. `alQuitar` es idempotente.
 - **Orden en el login**: `EfectosCastigos.alEntrar` llama a `procesarVencidos`, luego al control de ban, y solo después a `CongelarYCarcel.alEntrar`: un castigo vencido nunca se refuerza.
 - **Congelado y preso a la vez**: manda la cárcel (el punto congelado se recoloca dentro de la cárcel); el congelado sigue bloqueando acciones. Al salir de la cárcel sigue congelado donde aterriza.
 - **Staff**: nunca se teletransporta ni se bloquea (defensivo, aunque no se le pueda castigar).
-- Límites: si el staff usa `/execute as <preso> run ...`, ese comando también se cancela (la fuente es el preso); un congelado en lava o en el vacío puede morir en bucle (al reaparecer vuelve a su punto).
+- Notas: solo se bloquean los comandos que escribe el preso; un `/execute as <preso> run ...` del staff NO se cancela (brigadier conserva la fuente del staff en el contexto raíz). Un preso o congelado no puede ser movido de dimensión por el staff (el viaje se cancela) y un `/tp` en la misma dimensión se deshace en el siguiente tick: perdonar primero.
 
 ## Estructura (`com.senju.core`)
 
@@ -302,15 +302,19 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] N congelado montado en caballo/barco: queda desmontado; no puede volver a montar.
 - [ ] N congelado en un portal del Nether/End: no cambia de dimensión.
 - [ ] N congelado volando con élitros/cayendo desde altura: vuelve al punto sin daño de caída.
-- [ ] N congelado usa `/kill` o muere (S con `/kill N`): al reaparecer vuelve a su punto congelado.
+- [ ] N congelado: un zombi, S con espada, lava o caída no le hacen daño.
+- [ ] S usa `/kill N` con N congelado (no preso): reaparece en su cama/spawn y queda congelado allí (sin aviso de fuga).
 - [ ] N congelado se desconecta y vuelve: sigue congelado en el mismo punto.
-- [ ] Congelar a N desconectado; al entrar queda congelado donde aparece.
+- [ ] Congelar a N desconectado; al entrar queda congelado donde aparece. Congelar a N en la pantalla de muerte: queda congelado donde reaparece.
 - [ ] Congelar 1 m: al vencer puede moverse ("Tu castigo de Congelar terminó."). Perdonar: igual.
 - [ ] Cárcel sin `/staff carcel fijar`: "No hay cárcel fijada..." y nada en el historial/log.
 - [ ] Cárcel fijada; encarcelar a N 10 m: N aparece en el centro. Caminar > 8 bloques (o caer/subir > 8): vuelve al centro con "No puedes salir de la cárcel.".
 - [ ] N preso: `/spawn`, `/home`, `/tp`, `/kill`, `/msg`, `/execute ...`: todos cancelados con "Estás en la cárcel: no puedes usar comandos."; el chat normal sí funciona.
+- [ ] N preso: cubo de agua/lava (vaciar y recoger) no funciona; S con `/execute as N run say hola` sí funciona.
 - [ ] N preso: romper/colocar bloques no funciona; perla de ender y fruta coral no lo sacan; portal (si hubiera) no lo cambia de dimensión.
-- [ ] N preso muere (lava, vacío, `/kill N` por S): reaparece en la cárcel, aunque tenga cama.
+- [ ] N preso muere (lava, vacío, `/kill N` por S): reaparece en la cárcel aunque tenga cama (el cliente ve la cárcel, no la cama), sin "No puedes salir de la cárcel.".
+- [ ] Encarcelar a N en la pantalla de muerte: al reaparecer va a la cárcel; al terminar vuelve a donde reapareció.
+- [ ] Perdonar la cárcel con N en la pantalla de muerte: al reaparecer queda en su posición anterior a la cárcel.
 - [ ] S lo cambia de dimensión (`/execute in minecraft:the_nether run tp N ...`): no se mueve o vuelve a la cárcel al instante.
 - [ ] N preso se desconecta y vuelve: sigue en la cárcel.
 - [ ] Encarcelar de nuevo a N ya preso (otra duración): sigue en la cárcel y al terminar vuelve a donde estaba ANTES del primer encarcelamiento.

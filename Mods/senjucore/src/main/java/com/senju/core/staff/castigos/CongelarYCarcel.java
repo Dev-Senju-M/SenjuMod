@@ -4,6 +4,8 @@ import com.senju.core.staff.Staff;
 import com.senju.core.staff.castigos.RegistroCastigos.Datos;
 import com.senju.core.staff.castigos.RegistroCastigos.Posicion;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -15,13 +17,17 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.item.BucketItem;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -59,10 +65,12 @@ public class CongelarYCarcel {
             public void alAplicar(MinecraftServer server, UUID id, @Nullable ServerPlayer online, Castigos.Aplicado datos) {
                 RegistroCastigos reg = RegistroCastigos.de(server);
                 Datos d = reg.datos(id);
-                // Conectado: se congela donde está. Desconectado: se captura en el próximo login.
-                d.posCongelado = online != null ? posicionDe(online) : null;
+                // Conectado y vivo: se congela donde está. Desconectado o muerto: se captura en el próximo
+                // login / tras reaparecer (revisar).
+                boolean vivo = online != null && online.isAlive();
+                d.posCongelado = vivo ? posicionDe(online) : null;
                 reg.setDirty();
-                if (online != null && online.isPassenger()) online.stopRiding();
+                if (vivo && online.isPassenger()) online.stopRiding();
             }
 
             @Override
@@ -90,12 +98,13 @@ public class CongelarYCarcel {
                 RegistroCastigos reg = RegistroCastigos.de(server);
                 Datos d = reg.datos(id);
                 // (a) Si ya tenía retorno (ya preso, o un retorno pendiente) se conserva el original.
-                if (online != null && d.retornoCarcel == null) {
+                // Muerto o desconectado: el retorno y el traslado los hace revisar (login / tick tras reaparecer).
+                if (online == null || !online.isAlive()) return;
+                if (d.retornoCarcel == null) {
                     d.retornoCarcel = posicionDe(online);
                     reg.setDirty();
                 }
-                if (online != null && !Staff.esStaff(online)) llevarACarcel(online, d, reg);
-                // Desconectado: el retorno y el traslado se hacen en el próximo login (revisar).
+                if (!Staff.esStaff(online)) llevarACarcel(online, d, reg);
             }
 
             @Override
@@ -155,17 +164,21 @@ public class CongelarYCarcel {
         teletransportar(p, lvl, pos.x(), pos.y(), pos.z(), pos.yRot(), pos.xRot(), false);
     }
 
-    /** Lleva al preso al centro de la cárcel. Si además está congelado, su punto congelado pasa a ser el centro. */
-    private static void llevarACarcel(ServerPlayer p, Datos d, RegistroCastigos reg) {
+    /**
+     * Lleva al preso al centro de la cárcel. Si además está congelado, su punto congelado pasa a ser el centro.
+     * Devuelve true si hubo teletransporte (false si la cárcel o su dimensión ya no existen).
+     */
+    private static boolean llevarACarcel(ServerPlayer p, Datos d, RegistroCastigos reg) {
         Posicion c = reg.carcel();
-        if (c == null) return;
+        if (c == null) return false;
         ServerLevel lvl = nivel(p.server, c.dimension());
-        if (lvl == null) return;
+        if (lvl == null) return false;
         teletransportar(p, lvl, c);
         if (Castigos.activo(p.server, p.getUUID(), TipoCastigo.CONGELAR)) {
             d.posCongelado = posicionDe(p);
             reg.setDirty();
         }
+        return true;
     }
 
     /**
@@ -196,10 +209,12 @@ public class CongelarYCarcel {
     }
 
     /**
-     * Restauraciones pendientes y refuerzo de posición. Se llama en el login (después de procesarVencidos) y cada
-     * tick. Devuelve true si el jugador está congelado y quedó vigilado (para el aviso de la barra de acción).
+     * Restauraciones pendientes y refuerzo de posición. Se llama en el login (después de procesarVencidos), al
+     * cambiar de dimensión y cada tick; nunca dentro de PlayerRespawnEvent (ahí connection.player aún es la entidad
+     * vieja y el teletransporte no se aplica del todo). {@code avisar}: mostrar "No puedes salir de la cárcel."
+     * si se le devolvió al centro. Devuelve true si el jugador está congelado y vigilado (aviso de la barra).
      */
-    static boolean revisar(ServerPlayer p) {
+    static boolean revisar(ServerPlayer p, boolean avisar) {
         MinecraftServer server = p.server;
         RegistroCastigos reg = RegistroCastigos.de(server);
         Datos d = reg.datosSiExisten(p.getUUID());
@@ -225,8 +240,7 @@ public class CongelarYCarcel {
                     d.retornoCarcel = posicionDe(p);
                     reg.setDirty();
                 }
-                if (!dentroCarcel(p, c)) {
-                    llevarACarcel(p, d, reg);
+                if (!dentroCarcel(p, c) && llevarACarcel(p, d, reg) && avisar) {
                     p.displayClientMessage(Component.translatable("senjucore.castigo.carcel.limite"), true);
                 }
             }
@@ -257,8 +271,11 @@ public class CongelarYCarcel {
 
     /** Login: llamado por {@link EfectosCastigos#alEntrar} DESPUÉS de procesarVencidos y del control de ban. */
     public static void alEntrar(ServerPlayer p) {
-        revisar(p);
+        revisar(p, false);
     }
+
+    /** Recién reaparecidos: su primer tick hace la revisión (y el traslado) sin el aviso de fuga. */
+    private static final Set<UUID> REAPARECIDOS = new HashSet<>();
 
     // ---------------------------------------------------------------- consultas rápidas
 
@@ -282,21 +299,53 @@ public class CongelarYCarcel {
     public void alTick(TickEvent.PlayerTickEvent ev) {
         if (ev.phase != TickEvent.Phase.END || !ev.side.isServer()) return;
         if (!(ev.player instanceof ServerPlayer p)) return;
-        boolean congelado = revisar(p);
+        boolean congelado = revisar(p, !REAPARECIDOS.remove(p.getUUID()));
         if (congelado && p.tickCount % 20 == 0) {
             p.displayClientMessage(Component.translatable("senjucore.castigo.congelado"), true);
         }
     }
 
+    /**
+     * Reaparecer: NO se teletransporta aquí (connection.player aún apunta a la entidad vieja); el siguiente tick
+     * llama a revisar (preso -> cárcel; retorno pendiente -> retorno). Un congelado que no está preso se recongela
+     * donde reaparece (evita el bucle de muertes si su punto era letal).
+     */
     @SubscribeEvent
     public void alReaparecer(PlayerEvent.PlayerRespawnEvent ev) {
-        if (ev.getEntity() instanceof ServerPlayer p) revisar(p); // preso -> cárcel; retorno pendiente -> retorno
+        if (!(ev.getEntity() instanceof ServerPlayer p)) return;
+        REAPARECIDOS.add(p.getUUID());
+        RegistroCastigos reg = RegistroCastigos.de(p.server);
+        Datos d = reg.datosSiExisten(p.getUUID());
+        long ahora = System.currentTimeMillis();
+        if (d != null && d.posCongelado != null && d.estado.activo(TipoCastigo.CONGELAR, ahora)
+                && !d.estado.activo(TipoCastigo.CARCEL, ahora)) {
+            d.posCongelado = null;
+            reg.setDirty();
+        }
+    }
+
+    @SubscribeEvent
+    public void alSalir(PlayerEvent.PlayerLoggedOutEvent ev) {
+        REAPARECIDOS.remove(ev.getEntity().getUUID());
     }
 
     @SubscribeEvent
     public void alCambiarDimension(PlayerEvent.PlayerChangedDimensionEvent ev) {
         if (teletransportando) return;
-        if (ev.getEntity() instanceof ServerPlayer p) revisar(p);
+        if (ev.getEntity() instanceof ServerPlayer p) revisar(p, true);
+    }
+
+    /** Ni vaciar ni llenar cubos (BucketItem dispara FillBucketEvent, no EntityPlaceEvent). */
+    @SubscribeEvent
+    public void alCubo(FillBucketEvent ev) {
+        if (congelado(ev.getEntity()) || preso(ev.getEntity())) cancelar(ev);
+    }
+
+    /** El congelado no puede defenderse: no recibe ataques (salvo daño que ignora la invulnerabilidad: vacío, /kill). */
+    @SubscribeEvent
+    public void alSerAtacado(LivingAttackEvent ev) {
+        if (ev.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
+        if (congelado(ev.getEntity())) cancelar(ev);
     }
 
     /** Portales (y cualquier viaje que pase por ForgeHooks.onTravelToDimension) salvo nuestros teletransportes. */
@@ -343,7 +392,10 @@ public class CongelarYCarcel {
 
     @SubscribeEvent
     public void alClicDerechoItem(PlayerInteractEvent.RightClickItem ev) {
-        if (congelado(ev.getEntity())) cancelar(ev);
+        if (congelado(ev.getEntity())
+                || (ev.getItemStack().getItem() instanceof BucketItem && preso(ev.getEntity()))) {
+            cancelar(ev);
+        }
     }
 
     @SubscribeEvent
