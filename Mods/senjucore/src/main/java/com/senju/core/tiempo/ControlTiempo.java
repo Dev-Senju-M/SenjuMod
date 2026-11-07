@@ -41,6 +41,7 @@ public class ControlTiempo {
     }
 
     public static void expulsar(ServerPlayer p) {
+        com.senju.core.ExpulsadosAlEntrar.marcar(p.getUUID());
         p.connection.disconnect(Component.translatable("senjucore.expulsado"));
         guardar(p.server);
     }

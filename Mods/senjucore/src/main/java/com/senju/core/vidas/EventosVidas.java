@@ -42,10 +42,12 @@ public class EventosVidas {
             reg.setDirty();
         }
         // Otro handler ya lo desconectó en este login (ban, límite diario): no aplicar nada; sigue pendiente.
-        if (p.hasDisconnected()) return;
+        // (Si otro handler expulsa DESPUÉS de este, el revivir ya se aplicó: aceptado, no depende del orden.)
+        if (com.senju.core.ExpulsadosAlEntrar.esta(p.getUUID()) || p.hasDisconnected()) return;
         // Entra muerto (salió en la pantalla de muerte): el revivir espera a su primer tick vivo, sin rechazo.
         if (!p.isAlive() && pendiente(p)) {
             Vidas.REVISAR.add(p.getUUID());
+            Vidas.enviarVidas(p);
             return;
         }
         // Primero el revivir pendiente, después el rechazo por eliminado.
@@ -55,6 +57,7 @@ public class EventosVidas {
                 // El anfitrión de un mundo local no puede quedar fuera de su propio mundo: solo espectador.
                 p.setGameMode(GameType.SPECTATOR);
             } else {
+                com.senju.core.ExpulsadosAlEntrar.marcar(p.getUUID());
                 p.connection.disconnect(Component.translatable("senjucore.vidas.rechazo"));
                 return;
             }
@@ -65,11 +68,13 @@ public class EventosVidas {
     @SubscribeEvent
     public void alSalir(PlayerEvent.PlayerLoggedOutEvent ev) {
         Vidas.REVISAR.remove(ev.getEntity().getUUID());
+        com.senju.core.ExpulsadosAlEntrar.quitar(ev.getEntity().getUUID());
     }
 
     @SubscribeEvent
     public void alDetener(ServerStoppedEvent ev) {
         Vidas.REVISAR.clear();
+        com.senju.core.ExpulsadosAlEntrar.limpiar();
     }
 
     /**

@@ -186,6 +186,7 @@ public class EfectosCastigos {
         Castigos.procesarVencidos(server, p.getUUID(), p);
         reconstruirSilencio(server, p.getUUID());
         if (Castigos.activo(server, p.getUUID(), TipoCastigo.BAN) && !Castigos.esStaff(server, p.getGameProfile())) {
+            com.senju.core.ExpulsadosAlEntrar.marcar(p.getUUID());
             p.connection.disconnect(mensajeBan(Castigos.vence(server, p.getUUID(), TipoCastigo.BAN),
                     motivoActivo(server, p.getUUID(), TipoCastigo.BAN)));
             return;
