@@ -10,5 +10,14 @@
   "senjucore.panel.jugado": "Tiempo jugado hoy: %s",
   "senjucore.panel.restante": "Tiempo restante: %s",
   "senjucore.panel.hora": "Hora: %s",
-  "senjucore.panel.misiones": "Misiones: Próximamente"
+  "senjucore.panel.misiones": "Misiones: Próximamente",
+  "item.senjucore.placa_staff": "Placa de Staff",
+  "senjucore.placa.desc1": "Herramienta exclusiva del staff",
+  "senjucore.placa.desc2": "Clic derecho para abrir el menú",
+  "senjucore.placa.proximamente": "Menú del staff: próximamente",
+  "senjucore.placa.sinpermiso": "No tienes permiso para usar la Placa de Staff",
+  "senjucore.placa.dada": "Placa de Staff entregada a %s.",
+  "senjucore.placa.yatiene": "%s ya tiene una Placa de Staff.",
+  "senjucore.placa.noesstaff": "%s no es staff.",
+  "senjucore.placa.lleno": "El inventario de %s está lleno."
 }

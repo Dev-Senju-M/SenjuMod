@@ -4,7 +4,9 @@ import com.senju.core.config.ClientConfig;
 import com.senju.core.config.CommonConfig;
 import com.senju.core.network.Red;
 import com.senju.core.tiempo.ControlTiempo;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -25,6 +27,12 @@ public class SenjuCore {
         ctx.registerConfig(ModConfig.Type.COMMON, CommonConfig.SPEC, "senjucore-common.toml");
         ctx.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC, "senjucore-client.toml");
         modBus.addListener((FMLCommonSetupEvent e) -> e.enqueueWork(Red::registrar));
+        com.senju.core.staff.ItemsMod.ITEMS.register(modBus);
+        modBus.addListener((BuildCreativeModeTabContentsEvent e) -> {
+            if (e.getTabKey() == CreativeModeTabs.OP_BLOCKS && e.hasPermissions())
+                e.accept(com.senju.core.staff.ItemsMod.PLACA_STAFF);
+        });
+        MinecraftForge.EVENT_BUS.register(new com.senju.core.staff.ComandoStaff());
         MinecraftForge.EVENT_BUS.register(new ControlTiempo());
         MinecraftForge.EVENT_BUS.register(new com.senju.core.tiempo.ComandoTiempo());
         LOGGER.info("Senju Core cargado");
