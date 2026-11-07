@@ -24,5 +24,13 @@
   "senjucore.vanish.off": "Vanish desactivado",
   "senjucore.vanish.aviso.on": "%s activó Vanish",
   "senjucore.vanish.aviso.off": "%s desactivó Vanish",
-  "senjucore.panel.vanish": "VANISH"
+  "senjucore.panel.vanish": "VANISH",
+  "senjucore.menu.titulo": "Panel de Staff",
+  "senjucore.menu.castigar": "Castigar",
+  "senjucore.menu.inventario": "Revisar inventario",
+  "senjucore.menu.cerrar": "Cerrar",
+  "senjucore.menu.vanish.on": "Vanish: activado",
+  "senjucore.menu.vanish.off": "Vanish: desactivado",
+  "senjucore.menu.vanish.desc": "Clic para alternar",
+  "senjucore.menu.proximamente": "Próximamente"
 }

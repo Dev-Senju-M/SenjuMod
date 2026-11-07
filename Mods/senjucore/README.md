@@ -78,7 +78,7 @@ Funcionan también con jugadores desconectados (por ejemplo, uno ya expulsado po
 
 ## Placa de Staff
 
-Ítem `senjucore:placa_staff` exclusivo del staff (por ahora, clic derecho muestra "Menú del staff: próximamente").
+Ítem `senjucore:placa_staff` exclusivo del staff (clic derecho abre el menú del staff, ver abajo).
 Es staff quien sea operador nivel 2+ (si `staffIncluyeOperadores = true`) o esté en la lista `staff`
 (nombres, sin distinguir mayúsculas) de `senjucore-common.toml`. Se obtiene con `/staff placa [jugador]`
 o desde la pestaña creativa de operadores.
@@ -94,6 +94,10 @@ borrar la placa, y el clic central puede clonarla (el creativo lo controla el cl
 se entera); se recupera con `/staff placa`. Las pruebas de protección (morir, tirar, cofres) hazlas en
 **supervivencia**. Los contenedores se revisan al inicio
 de cada tick del servidor (antes que las tolvas) y, si un no staff ve la placa en un contenedor, se descarta.
+
+## Menú del staff
+
+Clic derecho con la Placa abre "Panel de Staff" (cofre de 3 filas; `MenuStaff` sobre `MenuType.GENERIC_9x3`, el cliente usa la pantalla vanilla). Botones: Castigar (slot 10) e Inventario (16) muestran "Próximamente" en la barra de acción; Vanish (13, poción: brilla si está activo) alterna Vanish; Cerrar (22). `clicked` nunca llama a `super`: ningún tipo de clic mueve ítems ni deja nada en el cursor; solo un clic simple (PICKUP) en un botón actúa. Se cierra solo si pierdes staff. Los botones nunca son placas (compatible con `ProteccionPlaca`).
 
 ## Vanish
 
@@ -118,10 +122,11 @@ Límites: las esferas de experiencia siguen volando hacia el jugador en Vanish y
 - `network`: `Red`, `PaqueteTiempo`, `PaqueteInfoServidor`.
 - `cliente`: `PanelHud`, `Teclas`, `EventosCliente`, `DatosCliente`, `Posicion`, `Formato`.
 - `staff`: `Staff`, `ReglaStaff` (lógica pura), `ItemsMod`, `PlacaStaffItem`, `ProteccionPlaca`, `ComandoStaff`.
+- `staff.menu`: `AccionMenu` (lógica pura), `MenuStaff` (menú), `BotonesMenu` (ítems).
 - `staff.vanish`: `ReglaVanish` (lógica pura), `RegistroVanish` (guardado), `Vanish` (estado, visibilidad, eventos).
 - `mixin`: `ServerPlayerMixin`, `PlayerListMixin`, `ServerGamePacketListenerImplMixin` (ocultación de Vanish).
 
-Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest`, `EfectosTest`, `ReglaStaffTest`, `ReglaVanishTest` (41 en total).
+Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest`, `EfectosTest`, `ReglaStaffTest`, `ReglaVanishTest`, `AccionMenuTest` (46 en total).
 
 ## Pruebas dentro del juego (checklist)
 
@@ -171,6 +176,14 @@ Arranca `runServer` y `runClient` y entra a `localhost`.
 - [ ] `/give` a un jugador no staff: desaparece en <= 1 s con el aviso.
 - [ ] Quitar a alguien de `staff` / hacerle deop: pierde la placa (también en mano secundaria y cursor).
 - [ ] Consola: `/staff placa <jugador>` funciona.
+
+### Menú del staff
+- [ ] Clic derecho con la Placa abre "Panel de Staff"; un no staff con una placa (obtenida a escondidas) no abre nada.
+- [ ] Clic izquierdo y derecho en Castigar/Inventario: "Próximamente" en la barra; Cerrar cierra; clic en cristal gris no hace nada (sin tooltip).
+- [ ] Clic en la poción alterna Vanish: cambia nombre (activado/desactivado) y brillo al instante; el panel muestra/oculta VANISH. Tooltip sin texto de efecto.
+- [ ] Ningún clic mueve ítems: shift+clic (en menú e inventario propio), arrastre (clic mantenido), teclas 1-9, F (mano secundaria), Q (soltar), doble clic, clic central (creativo), clic fuera de la ventana. Cursor siempre vacío.
+- [ ] Con el menú abierto, `deop` al jugador (si no está en `staff`): el menú se cierra.
+- [ ] Cerrar con Esc/E no devuelve ni pierde nada; la Placa sigue intacta en el inventario.
 
 ### Vanish (hacen falta dos jugadores)
 

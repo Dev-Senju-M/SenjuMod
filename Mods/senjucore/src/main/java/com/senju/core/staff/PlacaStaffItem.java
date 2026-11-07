@@ -63,7 +63,7 @@ public class PlacaStaffItem extends Item {
         ItemStack stack = player.getItemInHand(hand);
         if (level.isClientSide) return InteractionResultHolder.pass(stack);
         if (player instanceof ServerPlayer sp && Staff.esStaff(sp)) {
-            sp.displayClientMessage(Component.translatable("senjucore.placa.proximamente"), true);
+            com.senju.core.staff.menu.MenuStaff.abrir(sp);
             return InteractionResultHolder.sidedSuccess(stack, false);
         }
         return InteractionResultHolder.pass(stack);
