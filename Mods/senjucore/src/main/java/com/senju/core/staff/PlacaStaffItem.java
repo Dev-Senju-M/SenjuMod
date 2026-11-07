@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -41,7 +42,20 @@ public class PlacaStaffItem extends Item {
 
     @Override
     public boolean onDroppedByPlayer(ItemStack item, Player player) {
+        // El cliente ya quitó el ítem antes de enviar DROP_ITEM; se fuerza el reenvío del slot.
+        if (player instanceof ServerPlayer sp) {
+            Inventory inv = sp.getInventory();
+            sp.containerMenu.findSlot(inv, inv.selected)
+                    .ifPresent(i -> sp.containerMenu.setRemoteSlot(i, ItemStack.EMPTY));
+            sp.inventoryMenu.findSlot(inv, inv.selected)
+                    .ifPresent(i -> sp.inventoryMenu.setRemoteSlot(i, ItemStack.EMPTY));
+        }
         return false;
+    }
+
+    @Override
+    public boolean canFitInsideContainerItems() {
+        return false; // ni shulker boxes ni bundles
     }
 
     @Override

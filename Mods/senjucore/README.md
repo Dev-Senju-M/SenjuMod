@@ -99,8 +99,9 @@ de cada tick del servidor (antes que las tolvas) y, si un no staff ve la placa e
 - `tiempo`: `ReglaTiempo` (lógica pura), `EstadoTiempo`, `RegistroTiempo` (guardado), `ControlTiempo` (eventos del servidor), `ComandoTiempo`.
 - `network`: `Red`, `PaqueteTiempo`, `PaqueteInfoServidor`.
 - `cliente`: `PanelHud`, `Teclas`, `EventosCliente`, `DatosCliente`, `Posicion`, `Formato`.
+- `staff`: `Staff`, `ReglaStaff` (lógica pura), `ItemsMod`, `PlacaStaffItem`, `ProteccionPlaca`, `ComandoStaff`.
 
-Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest` (23 en total).
+Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest`, `EfectosTest`, `ReglaStaffTest` (37 en total).
 
 ## Pruebas dentro del juego (checklist)
 
@@ -139,8 +140,10 @@ Arranca `runServer` y `runClient` y entra a `localhost`.
 ### Placa de Staff
 
 - [ ] Tirar con Q (también Ctrl+Q): la placa se queda en el inventario.
+- [ ] Q: la placa sigue visible en la mano.
 - [ ] Arrastrarla fuera de la ventana del inventario (y desde creativo): vuelve al inventario.
 - [ ] Meterla en un cofre (clic, shift+clic, arrastre): vuelve al inventario al instante.
+- [ ] No se puede meter en una shulker (clic, shift-clic, tolva).
 - [ ] Tolva bajo un cofre: no se puede sacar por la tolva; shulker box: igual.
 - [ ] Clic derecho con la placa en un marco y en un soporte de armadura: no pasa nada.
 - [ ] Morir con la placa (con y sin `keepInventory`): reaparece con una sola placa, sin ítem en el suelo.

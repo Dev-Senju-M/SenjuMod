@@ -23,7 +23,9 @@ import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 
 /**
  * Mantiene la Placa de Staff con su dueño (todo en el servidor).
@@ -94,8 +96,17 @@ public class ProteccionPlaca {
         }
     }
 
-    // --- Muerte ---
+    // --- Nunca como ítem en el mundo ---
     @SubscribeEvent
+    public void alEntrarAlMundo(EntityJoinLevelEvent ev) {
+        if (ev.getLevel().isClientSide()) return;
+        if (ev.getEntity() instanceof ItemEntity ie && PlacaStaffItem.esPlaca(ie.getItem())) {
+            ev.setCanceled(true);
+        }
+    }
+
+    // --- Muerte ---
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void alMorirDrops(LivingDropsEvent ev) {
         if (!(ev.getEntity() instanceof ServerPlayer p)) return;
         Iterator<ItemEntity> it = ev.getDrops().iterator();

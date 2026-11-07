@@ -48,10 +48,13 @@ public class ComandoStaff {
             src.sendFailure(Component.translatable("senjucore.placa.yatiene", nombre));
             return 0;
         }
-        if (!objetivo.getInventory().add(new ItemStack(ItemsMod.PLACA_STAFF.get()))) {
+        // No usar Inventory.add(): en creativo pone el conteo a 0 y devuelve true sin dar nada.
+        int libre = objetivo.getInventory().getFreeSlot();
+        if (libre < 0) {
             src.sendFailure(Component.translatable("senjucore.placa.lleno", nombre));
             return 0;
         }
+        objetivo.getInventory().setItem(libre, new ItemStack(ItemsMod.PLACA_STAFF.get()));
         src.sendSuccess(() -> Component.translatable("senjucore.placa.dada", nombre), true);
         return 1;
     }
