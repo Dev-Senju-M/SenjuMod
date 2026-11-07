@@ -76,6 +76,19 @@ Funcionan también con jugadores desconectados (por ejemplo, uno ya expulsado po
 - Un jugador: no hay límite; el panel muestra el nombre del mundo y el tiempo jugado hoy.
 - El panel se oculta con F1 y al abrir inventarios o menús (el chat lo mantiene visible).
 
+## Placa de Staff
+
+Ítem `senjucore:placa_staff` exclusivo del staff (por ahora, clic derecho muestra "Menú del staff: próximamente").
+Es staff quien sea operador nivel 2+ (si `staffIncluyeOperadores = true`) o esté en la lista `staff`
+(nombres, sin distinguir mayúsculas) de `senjucore-common.toml`. Se obtiene con `/staff placa [jugador]`
+o desde la pestaña creativa de operadores.
+
+Protección (servidor): no se tira (Q, arrastrar fuera, creativo), no se queda en contenedores, marcos ni
+soportes, se conserva al morir, y a quien no es staff se le elimina (revisión cada 1 s) con aviso.
+Si no cabe en el inventario va al cursor; si el cursor está ocupado queda pendiente en memoria y vuelve
+en cuanto haya hueco (nunca se suelta al suelo). Las placas apartadas al morir viven en memoria: si el
+servidor se reinicia con un jugador muerto sin reaparecer, se pierden (se recupera con `/staff placa`).
+
 ## Estructura (`com.senju.core`)
 
 - `config`: `CommonConfig`, `ClientConfig`.
@@ -118,3 +131,16 @@ Arranca `runServer` y `runClient` y entra a `localhost`.
 - [ ] Efectos: con `horasDiarias = 0.15` la línea de tiempo parpadea cuando quedan menos de 10 min.
 - [ ] Efectos: con `rgb = false` vuelven los colores clásicos (blanco, tiempo blanco/amarillo/rojo, misiones gris) y no hay parpadeo.
 - [ ] Efectos: con `fuentePersonalizada = false` el panel vuelve a la fuente de Minecraft.
+
+### Placa de Staff
+
+- [ ] Tirar con Q (también Ctrl+Q): la placa se queda en el inventario.
+- [ ] Arrastrarla fuera de la ventana del inventario (y desde creativo): vuelve al inventario.
+- [ ] Meterla en un cofre (clic, shift+clic, arrastre): vuelve al inventario al instante.
+- [ ] Tolva bajo un cofre: no se puede sacar por la tolva; shulker box: igual.
+- [ ] Clic derecho con la placa en un marco y en un soporte de armadura: no pasa nada.
+- [ ] Morir con la placa (con y sin `keepInventory`): reaparece con una sola placa, sin ítem en el suelo.
+- [ ] Inventario lleno y placa en un cofre: aparece en el cursor; con el cursor ocupado se devuelve al liberarlo.
+- [ ] `/give` a un jugador no staff: desaparece en <= 1 s con el aviso.
+- [ ] Quitar a alguien de `staff` / hacerle deop: pierde la placa (también en mano secundaria y cursor).
+- [ ] Consola: `/staff placa <jugador>` funciona.

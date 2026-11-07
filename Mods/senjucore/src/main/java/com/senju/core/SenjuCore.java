@@ -33,6 +33,7 @@ public class SenjuCore {
                 e.accept(com.senju.core.staff.ItemsMod.PLACA_STAFF);
         });
         MinecraftForge.EVENT_BUS.register(new com.senju.core.staff.ComandoStaff());
+        MinecraftForge.EVENT_BUS.register(new com.senju.core.staff.ProteccionPlaca());
         MinecraftForge.EVENT_BUS.register(new ControlTiempo());
         MinecraftForge.EVENT_BUS.register(new com.senju.core.tiempo.ComandoTiempo());
         LOGGER.info("Senju Core cargado");
