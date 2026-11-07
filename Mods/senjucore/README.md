@@ -108,12 +108,15 @@ Al desactivarlo todos vuelven a verte sin reconectar. Si alguien gana o pierde s
 a los que están en Vanish; si el que pierde staff estaba en Vanish, se le desactiva.
 
 Se hace con Mixin (`com.senju.core.mixin`, config `senjucore.mixins.json`): `ServerPlayer#broadcastToPlayer`
-(entidad), `PlayerList#placeNewPlayer` (TAB y mensaje de entrada) y `ServerGamePacketListenerImpl#onDisconnect`
-(mensaje de salida). Si un Mixin no se aplica, el juego falla al arrancar (no en silencio).
+(entidad) y `#die` (mensaje de muerte), `PlayerList#placeNewPlayer` (TAB y mensaje de entrada) y `#broadcast`
+(sonidos), `ServerGamePacketListenerImpl#onDisconnect` (mensaje de salida) y `#sendPlayerChatMessage` (chat),
+`PlayerAdvancements#award` (anuncio de logros). Si un Mixin no se aplica, el juego falla al arrancar (no en silencio).
 
 Sin rastro (`EventosVanish`): los mobs no lo eligen como objetivo (se les quita el objetivo cada 20 ticks en 64 bloques), no recoge ítems del suelo y abre cofres (también dobles y trampa), barriles y shulkers en silencio: sin sonido, sin animación de tapa y sin señal de redstone. Respeta candados, cofre bloqueado y shulker obstruida. Agachado con un ítem en la mano se comporta como vanilla. También el cofre de ender (sin sonido ni tapa). Los mobs con cerebro (Warden, Piglin, Hoglin...) pierden también su objetivo y su ira.
 
-Límites: las esferas de experiencia siguen volando hacia el jugador en Vanish y las flechas en el suelo pueden recogerse (rastros visibles sin tratar); no oculta de `/list`, selectores (`@a`), placas de presión, cables trampa ni sonidos de bloques.
+Además: su chat (también `/msg`, `/me`, `/say`, `/teammsg`) llega a los no staff como chat sin firma, sin desconectarlos aunque no lo tengan en TAB; los no staff no oyen sus pasos ni los sonidos/eventos que origina él (`PlayerList#broadcast`); su muerte y sus logros solo se anuncian al staff y a la consola (`ServerPlayer#die`, `PlayerAdvancements#award`); no absorbe esferas de experiencia. Con el panel oculto (`H`) la etiqueta VANISH se sigue mostrando sola.
+
+Límites: las esferas de experiencia aún pueden desviarse hacia el jugador en Vanish (no las absorbe) y las flechas en el suelo pueden recogerse (rastros visibles sin tratar); no oculta de `/list`, selectores (`@a`), placas de presión, cables trampa ni sonidos de bloques. La lista de servidores del menú multijugador (número de jugadores y nombres al pasar el ratón) sigue contando e incluyendo a los jugadores en Vanish.
 
 ## Estructura (`com.senju.core`)
 
@@ -202,3 +205,8 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] S en Vanish con cofre bajo un bloque sólido (o gato sentado) o shulker obstruida: no abre, igual que vanilla. Contenedor con candado: muestra el mensaje y no abre.
 - [ ] S en Vanish agachado con un bloque en la mano sobre un cofre: coloca el bloque (vanilla). Romper el cofre con el menú abierto lo cierra.
 - [ ] Un zombi/esqueleto cercano deja de perseguir a S en <= 1 s; S no recoge ítems del suelo. Al salir de Vanish todo vuelve a la normalidad.
+- [ ] S en Vanish escribe en el chat y usa `/msg N hola`: N no es desconectado y ve los mensajes (sin entrada de S en TAB). Igual con `/me` y `/say`.
+- [ ] S en Vanish camina y corre junto a N: N no oye sus pasos (los sonidos que vanilla emite sin origen, p. ej. comer, sí se oyen).
+- [ ] S en Vanish oculta el panel con `H`: la etiqueta VANISH sigue visible sola en la esquina del panel (F1 y F3 la ocultan).
+- [ ] S en Vanish muere (`/kill`) y consigue un logro: N no ve el mensaje de muerte ni el anuncio del logro; otro staff y la consola sí.
+- [ ] S en Vanish junto a esferas de experiencia: no las absorbe (pueden acercarse); al salir de Vanish las recoge.

@@ -16,6 +16,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.scores.Team;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -83,6 +84,36 @@ public class Vanish {
         }
         lista.getServer().sendSystemMessage(mensaje);
         for (ServerPlayer p : lista.getPlayers()) if (puedeVer(sujeto, p)) p.sendSystemMessage(mensaje, overlay);
+    }
+
+    /** Como {@link PlayerList#broadcastSystemToTeam}, pero si {@code sujeto} está en Vanish solo a quien puede verlo. */
+    public static void difundirAEquipo(PlayerList lista, ServerPlayer sujeto, Component mensaje) {
+        if (!esta(sujeto)) {
+            lista.broadcastSystemToTeam(sujeto, mensaje);
+            return;
+        }
+        Team equipo = sujeto.getTeam();
+        if (equipo == null) return;
+        for (String nombre : equipo.getPlayers()) {
+            ServerPlayer p = lista.getPlayerByName(nombre);
+            if (p != null && p != sujeto && puedeVer(sujeto, p)) p.sendSystemMessage(mensaje);
+        }
+    }
+
+    /** Como {@link PlayerList#broadcastSystemToAllExceptTeam}, filtrado por Vanish. */
+    public static void difundirFueraDeEquipo(PlayerList lista, ServerPlayer sujeto, Component mensaje) {
+        if (!esta(sujeto)) {
+            lista.broadcastSystemToAllExceptTeam(sujeto, mensaje);
+            return;
+        }
+        Team equipo = sujeto.getTeam();
+        if (equipo == null) {
+            difundirMensaje(lista, mensaje, false, sujeto);
+            return;
+        }
+        for (ServerPlayer p : lista.getPlayers()) {
+            if (p.getTeam() != equipo && puedeVer(sujeto, p)) p.sendSystemMessage(mensaje);
+        }
     }
 
     /**

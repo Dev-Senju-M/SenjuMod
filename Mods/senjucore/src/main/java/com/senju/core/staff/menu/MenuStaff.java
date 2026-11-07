@@ -21,6 +21,10 @@ import net.minecraft.world.item.ItemStack;
  */
 public class MenuStaff extends ChestMenu {
     private static final int FILAS = 3;
+    /** Ticks mínimos entre dos cambios de Vanish desde el menú (evita alternar por clics repetidos). */
+    private static final int ESPERA_VANISH = 10;
+    /** Último tick de servidor en que cada jugador alternó Vanish desde el menú. */
+    private static final java.util.Map<java.util.UUID, Integer> ULTIMO_VANISH = new java.util.HashMap<>();
     private final Container menuContainer;
 
     private MenuStaff(int id, Inventory inv, Container c) {
@@ -52,12 +56,20 @@ public class MenuStaff extends ChestMenu {
                 && slotId >= 0 && slotId < menuContainer.getContainerSize()) {
             switch (AccionMenu.deSlot(slotId)) {
                 case VANISH -> {
-                    Vanish.alternar(sp);
-                    menuContainer.setItem(AccionMenu.SLOT_VANISH, BotonesMenu.vanish(Vanish.esta(sp)));
+                    int ahora = sp.server.getTickCount();
+                    Integer antes = ULTIMO_VANISH.get(sp.getUUID());
+                    if (antes == null || ahora - antes >= ESPERA_VANISH || ahora < antes) {
+                        ULTIMO_VANISH.put(sp.getUUID(), ahora);
+                        Vanish.alternar(sp);
+                        menuContainer.setItem(AccionMenu.SLOT_VANISH, BotonesMenu.vanish(Vanish.esta(sp)));
+                    }
                 }
                 case CASTIGAR, INVENTARIO ->
                         sp.displayClientMessage(Component.translatable("senjucore.menu.proximamente"), true);
-                case CERRAR -> sp.closeContainer();
+                case CERRAR -> {
+                    sp.closeContainer();
+                    return;
+                }
                 case NINGUNA -> { }
             }
         }

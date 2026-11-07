@@ -33,6 +33,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerXpEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -79,6 +80,12 @@ public class EventosVanish {
 
     @SubscribeEvent
     public void alRecoger(EntityItemPickupEvent e) {
+        if (e.getEntity() instanceof ServerPlayer p && Vanish.esta(p)) e.setCanceled(true);
+    }
+
+    /** Las esferas de experiencia pueden seguir acercándose, pero no se absorben. */
+    @SubscribeEvent
+    public void alRecogerXp(PlayerXpEvent.PickupXp e) {
         if (e.getEntity() instanceof ServerPlayer p && Vanish.esta(p)) e.setCanceled(true);
     }
 

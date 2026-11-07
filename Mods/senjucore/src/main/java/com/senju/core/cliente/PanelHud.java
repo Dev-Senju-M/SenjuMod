@@ -28,9 +28,14 @@ public final class PanelHud implements IGuiOverlay {
     @Override
     public void render(ForgeGui gui, GuiGraphics gfx, float partialTick, int w, int h) {
         Minecraft mc = Minecraft.getInstance();
-        if (!ClientConfig.VISIBLE.get() || mc.options.hideGui || mc.player == null) return;
+        if (mc.options.hideGui || mc.player == null) return;
         if (mc.options.renderDebug) return;
         if (mc.screen != null && !(mc.screen instanceof ChatScreen)) return;
+        if (!ClientConfig.VISIBLE.get()) {
+            // Panel oculto con H: la línea VANISH sigue visible sola en la esquina del panel.
+            if (DatosCliente.vanish()) dibujarSoloVanish(gfx, mc.font, w, h);
+            return;
+        }
 
         Font font = mc.font;
         String servidor = DatosCliente.nombreServidor();
@@ -106,6 +111,24 @@ public final class PanelHud implements IGuiOverlay {
         y += ALTO_LINEA;
         linea++;
         gfx.drawString(font, cMisiones, x, y, rgb ? Efectos.colorRgb(ms, vel, linea * Efectos.DESFASE_LINEA) : GRIS);
+        gfx.pose().popPose();
+    }
+
+    /** Etiqueta VANISH suelta (con fondo) en la esquina configurada del panel. */
+    private static void dibujarSoloVanish(GuiGraphics gfx, Font font, int w, int h) {
+        Style estilo = ClientConfig.FUENTE_PERSONALIZADA.get() ? ESTILO_PANEL : Style.EMPTY;
+        Component cVanish = txt(I18n.get("senjucore.panel.vanish"), estilo);
+        int ancho = font.width(cVanish) + 2 * PAD;
+        int alto = ALTO_LINEA + 2 * PAD - 2;
+        float escala = ClientConfig.ESCALA.get().floatValue();
+        int[] o = ClientConfig.POSICION.get().origen((int) Math.floor(w / escala), (int) Math.floor(h / escala),
+                ancho, alto, MARGEN, ClientConfig.DESPLAZAMIENTO_X.get(), ClientConfig.DESPLAZAMIENTO_Y.get());
+        gfx.pose().pushPose();
+        gfx.pose().scale(escala, escala, 1f);
+        gfx.fill(o[0], o[1], o[0] + ancho, o[1] + alto, FONDO);
+        if (!ClientConfig.RGB.get() || Efectos.parpadeoVisible(Util.getMillis())) {
+            gfx.drawString(font, cVanish, o[0] + PAD, o[1] + PAD, COLOR_VANISH);
+        }
         gfx.pose().popPose();
     }
 

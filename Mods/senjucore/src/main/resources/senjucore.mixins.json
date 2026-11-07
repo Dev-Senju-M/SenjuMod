@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "senjucore.refmap.json",
   "mixins": [
+    "PlayerAdvancementsMixin",
     "PlayerListMixin",
     "ServerGamePacketListenerImplMixin",
     "ServerPlayerMixin"
