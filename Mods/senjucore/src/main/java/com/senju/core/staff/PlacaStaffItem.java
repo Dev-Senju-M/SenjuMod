@@ -1,6 +1,7 @@
 package com.senju.core.staff;
 
 import java.util.List;
+import com.senju.core.staff.menu.MenuStaff;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -63,7 +64,7 @@ public class PlacaStaffItem extends Item {
         ItemStack stack = player.getItemInHand(hand);
         if (level.isClientSide) return InteractionResultHolder.pass(stack);
         if (player instanceof ServerPlayer sp && Staff.esStaff(sp)) {
-            com.senju.core.staff.menu.MenuStaff.abrir(sp);
+            MenuStaff.abrir(sp);
             return InteractionResultHolder.sidedSuccess(stack, false);
         }
         return InteractionResultHolder.pass(stack);

@@ -30,7 +30,8 @@ public final class BotonesMenu {
             lore.add(StringTag.valueOf(Component.Serializer.toJson(desc(descClave))));
             s.getOrCreateTagElement("display").put("Lore", lore);
         }
-        s.hideTooltipPart(ItemStack.TooltipPart.ADDITIONAL);
+        // Oculta todo salvo nombre y lore (el lore no es un TooltipPart).
+        for (ItemStack.TooltipPart parte : ItemStack.TooltipPart.values()) s.hideTooltipPart(parte);
         return s;
     }
 
