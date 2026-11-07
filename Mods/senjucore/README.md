@@ -95,6 +95,20 @@ se entera); se recupera con `/staff placa`. Las pruebas de protección (morir, t
 **supervivencia**. Los contenedores se revisan al inicio
 de cada tick del servidor (antes que las tolvas) y, si un no staff ve la placa en un contenedor, se descarta.
 
+## Vanish
+
+`/staff vanish` (solo staff) alterna Vanish; el estado se guarda en el mundo y sobrevive a reconexiones y reinicios.
+En Vanish, los jugadores **no staff**: no reciben tu entidad (no te ven ni a tu armadura), no te ven en TAB y no
+ven "se unió"/"abandonó la partida" cuando entras o sales. El staff te ve normal y sí recibe esos mensajes.
+Al desactivarlo todos vuelven a verte sin reconectar. Si alguien gana o pierde staff, en <= 1 s ve (o deja de ver)
+a los que están en Vanish; si el que pierde staff estaba en Vanish, se le desactiva.
+
+Se hace con Mixin (`com.senju.core.mixin`, config `senjucore.mixins.json`): `ServerPlayer#broadcastToPlayer`
+(entidad), `PlayerList#placeNewPlayer` (TAB y mensaje de entrada) y `ServerGamePacketListenerImpl#onDisconnect`
+(mensaje de salida). Si un Mixin no se aplica, el juego falla al arrancar (no en silencio).
+
+Límites: no oculta de `/list`, selectores (`@a`), placas de presión, cables trampa ni sonidos de bloques.
+
 ## Estructura (`com.senju.core`)
 
 - `config`: `CommonConfig`, `ClientConfig`.
@@ -102,8 +116,10 @@ de cada tick del servidor (antes que las tolvas) y, si un no staff ve la placa e
 - `network`: `Red`, `PaqueteTiempo`, `PaqueteInfoServidor`.
 - `cliente`: `PanelHud`, `Teclas`, `EventosCliente`, `DatosCliente`, `Posicion`, `Formato`.
 - `staff`: `Staff`, `ReglaStaff` (lógica pura), `ItemsMod`, `PlacaStaffItem`, `ProteccionPlaca`, `ComandoStaff`.
+- `staff.vanish`: `ReglaVanish` (lógica pura), `RegistroVanish` (guardado), `Vanish` (estado, visibilidad, eventos).
+- `mixin`: `ServerPlayerMixin`, `PlayerListMixin`, `ServerGamePacketListenerImplMixin` (ocultación de Vanish).
 
-Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest`, `EfectosTest`, `ReglaStaffTest` (37 en total).
+Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest`, `EfectosTest`, `ReglaStaffTest`, `ReglaVanishTest` (41 en total).
 
 ## Pruebas dentro del juego (checklist)
 
@@ -153,3 +169,17 @@ Arranca `runServer` y `runClient` y entra a `localhost`.
 - [ ] `/give` a un jugador no staff: desaparece en <= 1 s con el aviso.
 - [ ] Quitar a alguien de `staff` / hacerle deop: pierde la placa (también en mano secundaria y cursor).
 - [ ] Consola: `/staff placa <jugador>` funciona.
+
+### Vanish (hacen falta dos jugadores)
+
+El entorno de desarrollo abre un solo cliente. Para ver lo que ve un **no staff** necesitas un segundo
+cliente: otra instancia de Minecraft (otro launcher/cuenta, o una segunda copia de `runClient` con otro
+nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamaremos **S** al staff (op) y **N** al no staff.
+
+- [ ] S: `/staff vanish` → "Vanish activado", línea VANISH en el panel. N deja de ver a S y S desaparece de su TAB.
+- [ ] S: `/staff vanish` otra vez → N vuelve a ver a S (entidad y TAB) sin reconectar.
+- [ ] Con S en Vanish, N sale y vuelve a entrar: N nunca ve a S (ni un instante en TAB ni la entidad).
+- [ ] S en Vanish sale y vuelve a entrar: N no ve "S abandonó"/"S se unió" ni a S en TAB; otro staff sí ve los mensajes.
+- [ ] Con S en Vanish, hacer op a N (`op N`): en <= 1 s N ve a S (entidad y TAB). `deop N`: en <= 1 s deja de verlo.
+- [ ] S en Vanish y `deop S` (si `staff` no lo incluye): en <= 1 s se desactiva Vanish y N lo ve.
+- [ ] Reiniciar el servidor con S en Vanish: al entrar S sigue en Vanish y N no lo ve.
