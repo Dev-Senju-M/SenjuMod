@@ -168,7 +168,7 @@ public class EfectosCastigos {
         p.sendSystemMessage(mensajeSilencio(s));
     }
 
-    /** Login: primero cierra vencidos, reconstruye el silencio y expulsa si el BAN sigue activo. */
+    /** Login: primero cierra vencidos, reconstruye el silencio, expulsa si el BAN sigue activo y luego congelar/cárcel. */
     @SubscribeEvent
     public void alEntrar(PlayerEvent.PlayerLoggedInEvent ev) {
         if (!(ev.getEntity() instanceof ServerPlayer p)) return;
@@ -178,7 +178,10 @@ public class EfectosCastigos {
         if (Castigos.activo(server, p.getUUID(), TipoCastigo.BAN) && !Staff.esStaff(p)) {
             p.connection.disconnect(mensajeBan(Castigos.vence(server, p.getUUID(), TipoCastigo.BAN),
                     motivoActivo(server, p.getUUID(), TipoCastigo.BAN)));
+            return;
         }
+        // Congelar/cárcel SIEMPRE después de procesarVencidos: un castigo vencido nunca se refuerza.
+        CongelarYCarcel.alEntrar(p);
     }
 
     @SubscribeEvent

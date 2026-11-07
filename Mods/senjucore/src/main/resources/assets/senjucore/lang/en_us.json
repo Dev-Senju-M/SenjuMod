@@ -70,5 +70,8 @@
   "senjucore.castigo.silenciado": "Estás silenciado hasta %s. Motivo: %s",
   "senjucore.castigo.expulsado": "Fuiste expulsado. Motivo: %s",
   "senjucore.castigo.baneado": "Estás baneado hasta %s. Motivo: %s",
-  "senjucore.castigo.permanente": "permanente"
+  "senjucore.castigo.permanente": "permanente",
+  "senjucore.castigo.congelado": "Estás congelado",
+  "senjucore.castigo.carcel.limite": "No puedes salir de la cárcel.",
+  "senjucore.castigo.carcel.comando": "Estás en la cárcel: no puedes usar comandos."
 }

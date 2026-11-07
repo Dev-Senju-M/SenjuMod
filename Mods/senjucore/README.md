@@ -151,6 +151,18 @@ Límites: las esferas de experiencia aún pueden desviarse hacia el jugador en V
 - **Quitar horas**: normaliza el día, `ReglaTiempo.quitar` (permanente = todo el día), guarda (también sin conexión) y sincroniza; si se agota y el servidor aplica límite, expulsa con el mensaje del límite diario.
 - **Vencimientos**: cada 20 ticks y al entrar se llama a `Castigos.procesarVencidos` (avisa "Tu castigo de X terminó" una sola vez y llama a `alQuitar`).
 
+### Congelar y cárcel
+
+`CongelarYCarcel` (`staff.castigos`) registra los efectos de CONGELAR y CARCEL; la geometría pura está en `ReglaPosicion` (radio de cárcel 8 horizontal y vertical, tolerancia del congelado 0.1).
+
+- **Congelar**: al aplicar (conectado) guarda la posición (`posCongelado`, dimensión + xyz + rotación); si estaba desconectado se fija donde aparece al entrar. Cada tick del jugador (servidor), si se movió más de 0.1 o cambió de dimensión, vuelve a su punto (la cabeza gira libre: rotación relativa), se anula la caída y se corta el vuelo con élitros. Cancela romper, colocar, atacar, clic derecho en bloque/ítem, clic izquierdo en bloque, interactuar con entidades, montar, perlas de ender, fruta coral y portales; cierra cualquier contenedor que se abra. Puede hablar y mirar. Barra de acción "Estás congelado" cada segundo.
+- **Cárcel**: sin cárcel fijada (o con su dimensión desaparecida) `Castigos.aplicar` devuelve `SIN_CARCEL` y no se registra nada. Al aplicar guarda la posición de retorno (`retornoCarcel`; si ya existía, se conserva la original) y lo lleva al centro. Cada tick, fuera del radio 8 o en otra dimensión vuelve al centro ("No puedes salir de la cárcel."). Cancela romper/colocar, perlas, fruta coral, portales y **todos** los comandos ("Estás en la cárcel: no puedes usar comandos."); el chat sí. Al reaparecer o cambiar de dimensión, de vuelta a la cárcel. Al terminar (perdón o vencimiento) vuelve al retorno (al spawn del mundo si esa dimensión ya no existe).
+- **Desconectado**: un perdón/vencimiento sin conexión deja `retornoCarcel` guardado; al entrar (o en el primer tick/reaparición vivo) se devuelve al jugador y se borra. `alQuitar` es idempotente.
+- **Orden en el login**: `EfectosCastigos.alEntrar` llama a `procesarVencidos`, luego al control de ban, y solo después a `CongelarYCarcel.alEntrar`: un castigo vencido nunca se refuerza.
+- **Congelado y preso a la vez**: manda la cárcel (el punto congelado se recoloca dentro de la cárcel); el congelado sigue bloqueando acciones. Al salir de la cárcel sigue congelado donde aterriza.
+- **Staff**: nunca se teletransporta ni se bloquea (defensivo, aunque no se le pueda castigar).
+- Límites: si el staff usa `/execute as <preso> run ...`, ese comando también se cancela (la fuente es el preso); un congelado en lava o en el vacío puede morir en bucle (al reaparecer vuelve a su punto).
+
 ## Estructura (`com.senju.core`)
 
 - `config`: `CommonConfig`, `ClientConfig`.
@@ -160,10 +172,11 @@ Límites: las esferas de experiencia aún pueden desviarse hacia el jugador en V
 - `staff`: `Staff`, `ReglaStaff` (lógica pura), `ItemsMod`, `PlacaStaffItem`, `ProteccionPlaca`, `ComandoStaff`.
 - `staff.menu`: `AccionMenu`, `Paginacion`, `DisposicionInventario` (lógica pura), `MenuSoloLectura` (base), `MenuStaff`, `MenuSelector`, `MenuVerInventario`, `MenuVerEnder`, `MenuProhibidos` (menús), `BotonesMenu`, `CopiaVista` (ítems).
 - `staff.prohibidos`: `ListaProhibidos` (lógica pura), `RegistroProhibidos` (guardado), `Prohibidos` (fachada), `Confiscacion`, `RegistroConfiscados` (log de confiscaciones).
+- `staff.castigos`: `TipoCastigo`, `Duracion`, `EstadoCastigos`, `ReglaPosicion` (lógica pura), `RegistroCastigos` (guardado), `RegistroLogCastigos`, `Castigos` (servicio), `EfectoCastigo`, `EfectosCastigos`, `CongelarYCarcel` (efectos).
 - `staff.vanish`: `ReglaVanish` (lógica pura), `RegistroVanish` (guardado), `Vanish` (estado, visibilidad, eventos).
 - `mixin`: `ServerPlayerMixin`, `PlayerListMixin`, `ServerGamePacketListenerImplMixin` (ocultación de Vanish).
 
-Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest`, `EfectosTest`, `ReglaStaffTest`, `ReglaVanishTest`, `AccionMenuTest`, `PaginacionTest`, `DisposicionInventarioTest`, `ListaProhibidosTest` (54 en total).
+Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest`, `EfectosTest`, `ReglaStaffTest`, `ReglaVanishTest`, `AccionMenuTest`, `PaginacionTest`, `DisposicionInventarioTest`, `ListaProhibidosTest`, `DuracionTest`, `EstadoCastigosTest`, `ReglaPosicionTest` (82 en total).
 
 ## Pruebas dentro del juego (checklist)
 
@@ -281,3 +294,28 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] Banear a N 1 h (conectado): se desconecta con "baneado hasta <fecha>"; al reintentar entrar lo vuelve a expulsar con fecha y motivo. Banear permanente: dice "permanente".
 - [ ] Banear a N (desconectado) y que entre: expulsado al entrar. Ban de 1 m vencido estando desconectado: al entrar puede jugar y ve "Tu castigo de Banear terminó.".
 - [ ] Quitar 30 m a N (con límite activo en servidor dedicado): el panel baja 30 m. "Todo el día" lo expulsa con el mensaje del límite. Con N desconectado se aplica al entrar.
+
+### Congelar y cárcel (S staff, N no staff)
+- [ ] Congelar N 10 m: N no puede andar, saltar, agacharse para bajar ni volar: vuelve a su punto; puede girar la cabeza y hablar. Barra "Estás congelado" cada segundo.
+- [ ] N congelado: romper, colocar, atacar, abrir cofre/horno/caballo/aldeano, usar ítems (comer, arco, cubo): nada pasa; si llega a abrirse un contenedor se cierra.
+- [ ] N congelado: lanzar perla de ender y comer fruta coral: no se mueve.
+- [ ] N congelado montado en caballo/barco: queda desmontado; no puede volver a montar.
+- [ ] N congelado en un portal del Nether/End: no cambia de dimensión.
+- [ ] N congelado volando con élitros/cayendo desde altura: vuelve al punto sin daño de caída.
+- [ ] N congelado usa `/kill` o muere (S con `/kill N`): al reaparecer vuelve a su punto congelado.
+- [ ] N congelado se desconecta y vuelve: sigue congelado en el mismo punto.
+- [ ] Congelar a N desconectado; al entrar queda congelado donde aparece.
+- [ ] Congelar 1 m: al vencer puede moverse ("Tu castigo de Congelar terminó."). Perdonar: igual.
+- [ ] Cárcel sin `/staff carcel fijar`: "No hay cárcel fijada..." y nada en el historial/log.
+- [ ] Cárcel fijada; encarcelar a N 10 m: N aparece en el centro. Caminar > 8 bloques (o caer/subir > 8): vuelve al centro con "No puedes salir de la cárcel.".
+- [ ] N preso: `/spawn`, `/home`, `/tp`, `/kill`, `/msg`, `/execute ...`: todos cancelados con "Estás en la cárcel: no puedes usar comandos."; el chat normal sí funciona.
+- [ ] N preso: romper/colocar bloques no funciona; perla de ender y fruta coral no lo sacan; portal (si hubiera) no lo cambia de dimensión.
+- [ ] N preso muere (lava, vacío, `/kill N` por S): reaparece en la cárcel, aunque tenga cama.
+- [ ] S lo cambia de dimensión (`/execute in minecraft:the_nether run tp N ...`): no se mueve o vuelve a la cárcel al instante.
+- [ ] N preso se desconecta y vuelve: sigue en la cárcel.
+- [ ] Encarcelar de nuevo a N ya preso (otra duración): sigue en la cárcel y al terminar vuelve a donde estaba ANTES del primer encarcelamiento.
+- [ ] Perdonar la cárcel con N conectado: vuelve a su posición anterior (dimensión incluida, con su rotación).
+- [ ] Cárcel de 1 m que vence con N desconectado (o perdón con N desconectado): al entrar aparece en su posición anterior, no en la cárcel, y ve "Tu castigo de Cárcel terminó." (si venció).
+- [ ] Encarcelar a N desconectado: al entrar va a la cárcel; al terminar vuelve a donde había entrado.
+- [ ] N congelado y preso: queda en la cárcel, congelado. Perdonar solo la cárcel: vuelve a su posición y sigue congelado allí.
+- [ ] Reiniciar el servidor con N preso / congelado: el estado sigue al entrar.
