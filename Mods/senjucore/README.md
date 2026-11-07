@@ -145,9 +145,9 @@ Límites: las esferas de experiencia aún pueden desviarse hacia el jugador en V
 
 `EfectosCastigos` (`staff.castigos`) registra los efectos de silenciar, expulsar, banear y quitar horas:
 
-- **Silenciar**: cancela `ServerChatEvent` y los comandos `msg/tell/w/me/say/teammsg/tm` (raíz del comando, con o sin `minecraft:`) y avisa con la fecha de fin y el motivo. Solo a no staff.
+- **Silenciar**: cancela `ServerChatEvent` y los comandos `msg/tell/w/me/say/teammsg/tm` (raíz del comando, también dentro de `/execute ... run`) y avisa con la fecha de fin y el motivo. Solo a no staff. El chat se evalúa en un hilo de trabajo, así que lee una copia segura (`ConcurrentHashMap`) mantenida solo en el hilo del servidor, nunca el registro guardado.
 - **Expulsar**: desconecta con el motivo; no deja estado activo (solo historial).
-- **Banear**: desconecta al aplicar; al entrar, primero `procesarVencidos` y luego, si el BAN sigue activo, desconecta mostrando la fecha (`yyyy-MM-dd HH:mm`) o "permanente" y el motivo (tomado de la última entrada APLICAR del historial).
+- **Banear**: desconecta al aplicar; al entrar, primero `procesarVencidos` y luego, si el BAN sigue activo, desconecta mostrando la fecha (`yyyy-MM-dd HH:mm`) o "permanente" y el motivo (tomado de la última entrada APLICAR del historial). Límite: el intento de entrar de un baneado muestra brevemente "X se unió" / "X abandonó" a los demás (el aviso de entrada de vanilla ocurre antes de nuestra expulsión).
 - **Quitar horas**: normaliza el día, `ReglaTiempo.quitar` (permanente = todo el día), guarda (también sin conexión) y sincroniza; si se agota y el servidor aplica límite, expulsa con el mensaje del límite diario.
 - **Vencimientos**: cada 20 ticks y al entrar se llama a `Castigos.procesarVencidos` (avisa "Tu castigo de X terminó" una sola vez y llama a `alQuitar`).
 
