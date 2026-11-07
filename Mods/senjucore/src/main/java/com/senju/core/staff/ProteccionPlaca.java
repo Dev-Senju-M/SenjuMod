@@ -20,6 +20,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -40,6 +41,10 @@ public class ProteccionPlaca {
     /** Devuelve la placa al jugador sin soltarla jamás al suelo. */
     private void devolver(ServerPlayer p, ItemStack placa) {
         if (!Staff.esStaff(p)) return; // nunca a un no staff: se descarta
+        if (!p.isAlive()) { // muerto: el inventario no pasa al reaparecer, se devuelve en Clone
+            alMorir.computeIfAbsent(p.getUUID(), k -> new ArrayList<>()).add(placa);
+            return;
+        }
         Inventory inv = p.getInventory();
         // No usar inv.add(): en creativo descarta el stack si no hay hueco.
         int libre = inv.getFreeSlot();
@@ -149,17 +154,33 @@ public class ProteccionPlaca {
                 slot.set(ItemStack.EMPTY);
             }
         }
+        boolean muerto = !p.isAlive();
         for (ItemStack s : sueltas) {
+            if (muerto) { // el inventario guardado no se copia al reaparecer: va al almacén de Clone
+                alMorir.computeIfAbsent(p.getUUID(), k -> new ArrayList<>()).add(s);
+                continue;
+            }
             int libre = inv.getFreeSlot();
             if (libre >= 0) inv.setItem(libre, s);
             else pendientes.computeIfAbsent(p.getUUID(), k -> new ArrayList<>()).add(s);
         }
     }
 
+    /** Cierre del contenedor (puede llegar en el mismo lote que el clic): se extrae ya. */
+    @SubscribeEvent
+    public void alCerrar(PlayerContainerEvent.Close ev) {
+        if (!(ev.getEntity() instanceof ServerPlayer p)) return;
+        sacarSlots(p, ev.getContainer());
+    }
+
     /** Ningún slot que no sea del inventario del jugador (incluida la cuadrícula 2x2) puede tener la placa. */
     private void sacarDeContenedores(ServerPlayer p) {
+        sacarSlots(p, p.containerMenu);
+    }
+
+    private void sacarSlots(ServerPlayer p, AbstractContainerMenu menu) {
         Inventory inv = p.getInventory();
-        for (Slot slot : p.containerMenu.slots) {
+        for (Slot slot : menu.slots) {
             if (slot.container == inv) continue;
             ItemStack s = slot.getItem();
             if (PlacaStaffItem.esPlaca(s)) {
