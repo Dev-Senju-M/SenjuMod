@@ -102,5 +102,10 @@
   "senjucore.comando.carcel.fijada": "Cárcel fijada en %s (%s, %s, %s)",
   "senjucore.comando.banear.duracion": "Duración inválida: %s. Ejemplos: 10m, 1h, 1d, 7d, perm",
   "senjucore.comando.banear.ok": "Baneado %s (%s): %s",
-  "senjucore.comando.banear.fallo": "No se pudo banear a %s."
+  "senjucore.comando.banear.fallo": "No se pudo banear a %s.",
+  "senjucore.comando.historial.accion.aplicar": "aplicó",
+  "senjucore.comando.historial.accion.perdonar": "perdonó",
+  "senjucore.comando.historial.accion.vencer": "venció",
+  "senjucore.comando.banear.sinmotivo": "Escribe un motivo para el ban.",
+  "senjucore.comando.banear.varios": "Banear solo admite un jugador a la vez."
 }

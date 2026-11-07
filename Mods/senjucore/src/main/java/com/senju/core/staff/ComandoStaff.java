@@ -135,7 +135,7 @@ public class ComandoStaff {
             src.sendSuccess(() -> Component.translatable("senjucore.comando.historial.titulo", nombre), false);
             for (RegistroCastigos.Entrada e : h) {
                 src.sendSuccess(() -> Component.translatable("senjucore.comando.historial.linea",
-                        FECHA.format(Instant.ofEpochMilli(e.fecha())), e.accion(),
+                        FECHA.format(Instant.ofEpochMilli(e.fecha())), accionTexto(e.accion()),
                         Component.translatable("senjucore.castigo.tipo." + e.tipo().clave()),
                         e.duracion(), e.motivo(), e.staff()), false);
             }
@@ -166,12 +166,20 @@ public class ComandoStaff {
             return 0;
         }
         String motivo = StringArgumentType.getString(c, "motivo").trim();
+        if (motivo.isEmpty()) {
+            src.sendFailure(Component.translatable("senjucore.comando.banear.sinmotivo"));
+            return 0;
+        }
         ServerPlayer actor = src.getEntity() instanceof ServerPlayer sp ? sp : null;
         Component durComp = dur.getAsLong() == Duracion.PERMANENTE
                 ? Component.translatable("senjucore.castigo.permanente")
                 : Component.literal(Duracion.formatoDuracion(dur.getAsLong()));
         int n = 0;
         Collection<GameProfile> perfiles = GameProfileArgument.getGameProfiles(c, "jugador");
+        if (perfiles.size() != 1) {
+            src.sendFailure(Component.translatable("senjucore.comando.banear.varios"));
+            return 0;
+        }
         for (GameProfile gp : perfiles) {
             String nombre = nombreDe(gp);
             Castigos.Resultado r = Castigos.aplicar(src.getServer(), src.getTextName(), actor, gp,
@@ -190,6 +198,14 @@ public class ComandoStaff {
             }
         }
         return n;
+    }
+
+    private static Component accionTexto(String accion) {
+        return switch (accion) {
+            case "APLICAR", "PERDONAR", "VENCER" ->
+                    Component.translatable("senjucore.comando.historial.accion." + accion.toLowerCase());
+            default -> Component.literal(accion);
+        };
     }
 
     private static String nombreDe(GameProfile gp) {

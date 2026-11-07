@@ -71,9 +71,9 @@ Funcionan también con jugadores desconectados (por ejemplo, uno ya expulsado po
 ### Comandos de staff (`/staff ...`, solo staff)
 
 - `/staff perdonar <jugador> [silencio|ban|congelar|carcel]`: quita los castigos activos (todos o solo el indicado). Responde "Perdonado: X" o "X no tenía castigos activos". Funciona con desconectados (por perfil). Expulsar y Quitar horas no tienen estado que perdonar.
-- `/staff historial <jugador>`: últimos 10 registros, del más reciente: `yyyy-MM-dd HH:mm · <acción> <tipo> (<duración>) · <motivo> · por <staff>`; sin registros: "Sin historial".
+- `/staff historial <jugador>`: últimos 10 registros, del más reciente: `yyyy-MM-dd HH:mm · <acción> <tipo> (<duración>) · <motivo> · por <staff>`; sin registros: "Sin historial: <nombre>". La acción sale como aplicó / perdonó / venció.
 - `/staff carcel fijar`: fija la cárcel en tu posición (dimensión, xyz y rotación). Solo jugadores (la consola recibe error).
-- `/staff banear <jugador> <duración> <motivo...>`: banea también a desconectados y desde la consola. Duración `10m`, `1h`, `1d`, `7d` o `perm` (`<n>m|h|d`); si es inválida muestra los ejemplos. El motivo es texto libre. No se puede banear a staff.
+- `/staff banear <jugador> <duración> <motivo...>`: banea también a desconectados y desde la consola. Duración `10m`, `1h`, `1d`, `7d` o `perm` (`<n>m|h|d`); si es inválida muestra los ejemplos. El motivo es texto libre y obligatorio. Solo admite un jugador (un selector con varios, como @a, da error). No se puede banear a staff.
 
 ## Comportamiento
 
@@ -352,6 +352,6 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] `/staff banear N 5x algo` y `/staff banear N 0m algo`: "Duración inválida" con ejemplos. Banear a T (staff): "El staff no puede ser castigado".
 - [ ] `/staff perdonar N` con varios castigos: quita todos ("Perdonado: N"); repetir: "N no tenía castigos activos". `/staff perdonar N ban` solo quita el ban. Funciona con N desconectado.
 - [ ] `/staff perdonar N expulsion` no existe como opción (autocompletado solo silencio, ban, congelar, carcel).
-- [ ] `/staff historial N` muestra aplicar, perdonar y vencer, del más reciente, máximo 10; sin registros: "Sin historial". Texto en español, igual con idioma inglés.
+- [ ] `/staff historial N` muestra aplicar, perdonar y vencer, del más reciente, máximo 10; sin registros: "Sin historial: <nombre>". La acción sale como aplicó / perdonó / venció. Texto en español, igual con idioma inglés.
 - [ ] Recorrido completo: fijar cárcel, castigar a N desde el panel con cada uno de los 6 castigos, verificar efecto, perdonar con el comando, revisar `logs/senjucore-castigos.log` (una línea por acción, sin saltos raros en motivos).
 - [ ] Todo sobrevive a reiniciar el servidor (silencio, ban, congelado, cárcel, historial).
