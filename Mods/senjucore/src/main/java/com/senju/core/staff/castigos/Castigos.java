@@ -1,6 +1,7 @@
 package com.senju.core.staff.castigos;
 
 import com.mojang.authlib.GameProfile;
+import com.senju.core.SenjuCore;
 import com.senju.core.staff.ReglaStaff;
 import com.senju.core.staff.Staff;
 import com.senju.core.config.CommonConfig;
@@ -19,7 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 /**
  * Servicio de castigos: aplica, perdona, consulta y registra (estado, historial, log y avisos).
- * Los efectos de mundo los aportan las tareas siguientes con {@link #registrarEfecto}.
+ * Todo se ejecuta en el hilo del servidor. Los efectos de mundo los aportan las tareas siguientes con {@link #registrarEfecto}.
  */
 public final class Castigos {
     private Castigos() {}
@@ -70,20 +71,36 @@ public final class Castigos {
 
     // ---------------------------------------------------------------- aplicar
 
+    /** Texto de duración para QUITAR_HORAS con PERMANENTE. */
+    public static final String TODO_EL_DIA = "todo el día";
+
     /**
-     * Aplica un castigo. {@code duracionMs}: milisegundos o {@link Duracion#PERMANENTE}; se ignora para
-     * EXPULSION; para QUITAR_HORAS es el tiempo a restar (PERMANENTE = todo el día).
-     * Orden: staff -> veto del efecto -> estado/historial/log/avisos -> {@code alAplicar}.
+     * Aplica un castigo como un jugador staff. Ver la sobrecarga con servidor/actor para el contrato.
      */
     public static Resultado aplicar(ServerPlayer staff, GameProfile objetivo, TipoCastigo t, long duracionMs,
             String motivo) {
-        MinecraftServer server = staff.server;
-        UUID id = objetivo.getId();
+        return aplicar(staff.server, staff.getGameProfile().getName(), staff, objetivo, t, duracionMs, motivo);
+    }
+
+    /**
+     * Aplica un castigo (también desde consola: {@code actorJugador} null). {@code duracionMs}: milisegundos o
+     * {@link Duracion#PERMANENTE}; se ignora para EXPULSION; para QUITAR_HORAS es el tiempo a restar
+     * (PERMANENTE = todo el día, texto "todo el día").
+     * Orden: perfil válido -> staff -> cierra vencidos ({@link #procesarVencidos}) -> veto del efecto ->
+     * estado/historial/log/avisos -> {@code alAplicar} (con excepciones aisladas).
+     * Con ES_STAFF el mensaje {@code senjucore.castigo.esstaff} se envía a {@code actorJugador} si existe; si es
+     * null (consola) lo debe mostrar quien llama. Un perfil sin UUID devuelve VETADO sin hacer nada.
+     */
+    public static Resultado aplicar(MinecraftServer server, String actorNombre, @Nullable ServerPlayer actorJugador,
+            GameProfile objetivo, TipoCastigo t, long duracionMs, String motivo) {
+        UUID id = objetivo == null ? null : objetivo.getId();
+        if (id == null) return Resultado.VETADO;
         if (esStaff(server, objetivo)) {
-            staff.sendSystemMessage(Component.translatable("senjucore.castigo.esstaff"));
+            if (actorJugador != null) actorJugador.sendSystemMessage(Component.translatable("senjucore.castigo.esstaff"));
             return Resultado.ES_STAFF;
         }
         ServerPlayer online = server.getPlayerList().getPlayer(id);
+        procesarVencidos(server, id, online);
         EfectoCastigo ef = EFECTOS.get(t);
         if (ef != null) {
             Resultado v = ef.puedeAplicar(server, id, online, t);
@@ -91,25 +108,33 @@ public final class Castigos {
         }
         long ahora = System.currentTimeMillis();
         long vence = t.tieneDuracion() ? Duracion.vencimiento(ahora, duracionMs) : 0;
-        String durTxt = t == TipoCastigo.EXPULSION ? "-" : Duracion.formatoDuracion(duracionMs);
-        String nombreStaff = staff.getGameProfile().getName();
-        String nombre = objetivo.getName() == null ? id.toString() : objetivo.getName();
+        String durTxt;
+        if (t == TipoCastigo.EXPULSION) durTxt = "-";
+        else if (t == TipoCastigo.QUITAR_HORAS && duracionMs == Duracion.PERMANENTE) durTxt = TODO_EL_DIA;
+        else durTxt = Duracion.formatoDuracion(duracionMs);
 
         RegistroCastigos reg = RegistroCastigos.de(server);
         Datos d = reg.datos(id);
+        String nombre = objetivo.getName() != null ? objetivo.getName() : (d.nombre.isEmpty() ? id.toString() : d.nombre);
         d.nombre = nombre;
         if (t.tieneDuracion()) d.estado.aplicar(t, vence);
-        reg.agregarHistorial(id, new Entrada(ahora, nombreStaff, "APLICAR", t, durTxt, motivo));
+        reg.agregarHistorial(id, new Entrada(ahora, actorNombre, "APLICAR", t, durTxt, motivo));
         reg.setDirty();
-        RegistroLogCastigos.anotar(server, nombreStaff, "APLICAR", nombre, id.toString(), t.clave(), durTxt, motivo);
+        RegistroLogCastigos.anotar(server, actorNombre, "APLICAR", nombre, id.toString(), t.clave(), durTxt, motivo);
 
         Component tipoTxt = Component.translatable("senjucore.castigo.tipo." + t.clave());
         if (online != null) {
             online.sendSystemMessage(Component.translatable("senjucore.castigo.jugador", tipoTxt, durTxt, motivo));
         }
-        avisarStaff(server, Component.translatable("senjucore.castigo.staff", nombreStaff, nombre, tipoTxt, durTxt, motivo));
+        avisarStaff(server, Component.translatable("senjucore.castigo.staff", actorNombre, nombre, tipoTxt, durTxt, motivo));
 
-        if (ef != null) ef.alAplicar(server, id, online, new Aplicado(t, duracionMs, vence, motivo, nombreStaff));
+        if (ef != null) {
+            try {
+                ef.alAplicar(server, id, online, new Aplicado(t, duracionMs, vence, motivo, actorNombre));
+            } catch (RuntimeException ex) {
+                SenjuCore.LOGGER.error("Fallo en el efecto alAplicar de " + t, ex);
+            }
+        }
         return Resultado.OK;
     }
 
@@ -122,7 +147,8 @@ public final class Castigos {
 
     /** Igual que {@link #perdonar(CommandSourceStack, GameProfile, TipoCastigo)} con el nombre del actor explícito. */
     public static boolean perdonar(MinecraftServer server, String actor, GameProfile objetivo, @Nullable TipoCastigo t) {
-        UUID id = objetivo.getId();
+        UUID id = objetivo == null ? null : objetivo.getId();
+        if (id == null) return false;
         RegistroCastigos reg = RegistroCastigos.de(server);
         procesarVencidos(server, id, server.getPlayerList().getPlayer(id)); // los vencidos se cierran como vencidos
         Datos d = reg.datosSiExisten(id);
@@ -145,7 +171,7 @@ public final class Castigos {
             if (online != null) online.sendSystemMessage(Component.translatable("senjucore.castigo.perdonado.jugador", tipoTxt));
             avisarStaff(server, Component.translatable("senjucore.castigo.perdonado.staff", actor, nombre, tipoTxt));
             EfectoCastigo ef = EFECTOS.get(x);
-            if (ef != null) ef.alQuitar(server, id, online);
+            quitarEfecto(ef, server, id, online);
         }
         reg.setDirty();
         return true;
@@ -155,6 +181,7 @@ public final class Castigos {
      * Quita los castigos vencidos del jugador, anota VENCER en el historial, avisa al jugador si está conectado
      * y llama a {@code alQuitar}. Barato si no hay nada: pensado para el barrido periódico y el login.
      * Devuelve los tipos que vencieron.
+     * IMPORTANTE: las Tasks 2/3 deben llamarlo en el login ANTES de aplicar cualquier refuerzo de CARCEL o CONGELAR.
      */
     public static List<TipoCastigo> procesarVencidos(MinecraftServer server, UUID id, @Nullable ServerPlayer online) {
         RegistroCastigos reg = RegistroCastigos.de(server);
@@ -170,10 +197,19 @@ public final class Castigos {
                         Component.translatable("senjucore.castigo.tipo." + x.clave())));
             }
             EfectoCastigo ef = EFECTOS.get(x);
-            if (ef != null) ef.alQuitar(server, id, online);
+            quitarEfecto(ef, server, id, online);
         }
         reg.setDirty();
         return v;
+    }
+
+    private static void quitarEfecto(@Nullable EfectoCastigo ef, MinecraftServer server, UUID id, @Nullable ServerPlayer online) {
+        if (ef == null) return;
+        try {
+            ef.alQuitar(server, id, online);
+        } catch (RuntimeException ex) {
+            SenjuCore.LOGGER.error("Fallo en el efecto alQuitar", ex);
+        }
     }
 
     private static void avisarStaff(MinecraftServer server, Component msg) {

@@ -48,8 +48,8 @@ public final class Duracion {
         long ms = vence - ahora;
         if (ms < MIN) return "0m";
         long dias = ms / DIA, horas = (ms % DIA) / HORA, min = (ms % HORA) / MIN;
-        if (dias > 0) return dias + "d " + horas + "h";
-        if (horas > 0) return horas + "h " + String.format("%02d", min) + "m";
+        if (dias > 0) return horas == 0 ? dias + "d" : dias + "d " + horas + "h";
+        if (horas > 0) return min == 0 ? horas + "h" : horas + "h " + String.format("%02d", min) + "m";
         return min + "m";
     }
 

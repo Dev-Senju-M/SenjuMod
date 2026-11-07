@@ -56,4 +56,13 @@ class DuracionTest {
         assertEquals("0m", Duracion.formatoRestante(100, 50));
         assertEquals("0m", Duracion.formatoRestante(0, 30_000));
     }
+    @Test void formatoDuracionSinCerosSobrantes() {
+        assertEquals("1d", Duracion.formatoDuracion(86_400_000L));
+        assertEquals("7d", Duracion.formatoDuracion(7 * 86_400_000L));
+        assertEquals("1h", Duracion.formatoDuracion(3_600_000L));
+        assertEquals("10m", Duracion.formatoDuracion(10 * MIN));
+        assertEquals("2d 3h", Duracion.formatoDuracion((2 * 1440 + 180) * MIN));
+        assertEquals("1h 05m", Duracion.formatoDuracion(65 * MIN));
+        assertEquals("permanente", Duracion.formatoDuracion(Duracion.PERMANENTE));
+    }
 }
