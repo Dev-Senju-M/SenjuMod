@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.BlockHitResult;
 
 /** Altar Dracónico: clic derecho con un papel renombrado inicia el ritual de resurrección. */
@@ -26,6 +27,7 @@ public class AltarDraconicoBlock extends Block {
                 .strength(50.0F, 1200.0F)
                 .requiresCorrectToolForDrops()
                 .sound(SoundType.STONE)
+                .pushReaction(PushReaction.BLOCK)
                 .lightLevel(s -> 10));
     }
 
@@ -36,7 +38,14 @@ public class AltarDraconicoBlock extends Block {
         ItemStack mano = player.getItemInHand(hand);
         // Solo con la mano vacia o con papel se hace el ritual; con cualquier otra cosa se comporta como un bloque normal.
         if (!mano.isEmpty() && !mano.is(Items.PAPER)) return InteractionResult.PASS;
+        // Mano principal vacia con algo en la otra mano: se deja usar la otra mano (colocar bloques).
+        if (mano.isEmpty() && !player.getOffhandItem().isEmpty()) return InteractionResult.PASS;
         if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (mano.isEmpty()) {
+            // Solo una pista, sin comprobar el resto.
+            player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("senjucore.ritual.pergamino"));
+            return InteractionResult.CONSUME;
+        }
         if (level instanceof ServerLevel sl && player instanceof ServerPlayer sp) Ritual.intentar(sl, pos, sp, mano);
         return InteractionResult.CONSUME;
     }

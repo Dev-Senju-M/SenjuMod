@@ -129,5 +129,6 @@
   "senjucore.ritual.pergamino": "Sostén un papel renombrado con el nombre del jugador a resucitar.",
   "senjucore.ritual.noeliminado": "%s no está eliminado.",
   "senjucore.ritual.completado": "Ritual completado: %s regresa de entre los muertos.",
-  "block.senjucore.altar_draconico": "Altar Dracónico"
+  "block.senjucore.altar_draconico": "Altar Dracónico",
+  "senjucore.ritual.ya_resucitando": "%s ya va a resucitar."
 }

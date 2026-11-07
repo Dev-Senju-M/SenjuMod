@@ -54,7 +54,7 @@ public final class Ritual {
                 d -> tipoLogico(level.getBlockState(altar.offset(d[0], d[1], d[2]))));
 
         // Fuera del Overworld nunca es "de noche" para el ritual.
-        boolean noche = level.dimension() == Level.OVERWORLD && level.isNight();
+        boolean noche = level.dimension() == Level.OVERWORLD && ReglaRitual.esDeNoche(level.getDayTime());
         Vec3 centro = Vec3.atCenterOf(altar);
         int cerca = 0;
         for (ServerPlayer p : level.players()) {
@@ -66,14 +66,20 @@ public final class Ritual {
                 ? Optional.empty() : RegistroVidas.de(server).buscarPorNombre(nombre);
         boolean eliminado = objetivo.isPresent() && Vidas.eliminado(server, objetivo.get());
 
+        boolean pendiente = false;
+        if (eliminado) {
+            var datos = RegistroVidas.de(server).datosSiExisten(objetivo.get().getId());
+            pendiente = datos != null && datos.pendienteRevivir > 0;
+        }
+
         Condiciones c = new Condiciones(pilares.isEmpty(), noche, CommonConfig.RITUAL_DE_NOCHE.get(), cerca,
-                necesarios, buscarTotem(activador) != null, nombre, eliminado);
+                necesarios, buscarTotem(activador) != null, nombre, eliminado, pendiente);
         List<Falta> faltas = ReglaRitual.verificar(c);
         if (!faltas.isEmpty()) {
             for (Falta f : faltas) {
                 Component msg = switch (f) {
                     case JUGADORES -> Component.translatable(clave(f), cerca, necesarios);
-                    case NO_ELIMINADO -> Component.translatable(clave(f), nombre);
+                    case NO_ELIMINADO, YA_RESUCITANDO -> Component.translatable(clave(f), nombre);
                     default -> Component.translatable(clave(f));
                 };
                 activador.sendSystemMessage(msg);
@@ -105,6 +111,7 @@ public final class Ritual {
             case TOTEM -> "totem";
             case PERGAMINO -> "pergamino";
             case NO_ELIMINADO -> "noeliminado";
+            case YA_RESUCITANDO -> "ya_resucitando";
         };
     }
 

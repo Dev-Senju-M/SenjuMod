@@ -234,8 +234,8 @@ Bloque `senjucore:altar_draconico` (pestaña de bloques funcionales; dureza de o
 
 **Ritual** (clic derecho al altar con la mano principal; con otro objeto en la mano se comporta como un bloque normal):
 1. Sostener un **papel renombrado** (yunque) con el nombre exacto del jugador eliminado (no distingue mayúsculas; el jugador debe haber entrado alguna vez al servidor).
-2. Estructura completa, **de noche** (solo Overworld; en otra dimensión con `ritualDeNoche=true` siempre falta "noche"), al menos `jugadoresRitual` jugadores vivos y no espectadores a 8 bloques o menos del centro del altar (el que lo activa cuenta; el staff cuenta como jugador), y un **tótem** en el inventario del que lo activa (principal u offhand).
-3. Si algo falta, se envía un mensaje por cada cosa que falta y **no se consume nada**. Si todo está bien: se consume 1 papel y 1 tótem, rayo solo visual, partículas de fuego y sonido de tótem, y el jugador revive con `vidasAlRevivir` vidas sobre el altar (conectado: en el acto; desconectado: al entrar). El aviso "HA RESUCITADO" lo emite `Vidas.revivir`.
+2. Estructura completa, **de noche** (tiempo 13000-23000 en el Overworld; la lluvia de día no cuenta; en otra dimensión con `ritualDeNoche=true` siempre falta "noche"), al menos `jugadoresRitual` jugadores vivos y no espectadores a 8 bloques o menos del centro del altar (el que lo activa cuenta; el staff cuenta como jugador), y un **tótem** en el inventario del que lo activa (principal u offhand).
+3. Los objetos se consumen también en creativo. Un objetivo cuyo revivir ya está pendiente ("ya va a resucitar") no consume nada. El altar no se mueve con pistones. Si algo falta, se envía un mensaje por cada cosa que falta y **no se consume nada**. Si todo está bien: se consume 1 papel y 1 tótem, rayo solo visual, partículas de fuego y sonido de tótem, y el jugador revive con `vidasAlRevivir` vidas sobre el altar (conectado: en el acto; desconectado: al entrar). El aviso "HA RESUCITADO" lo emite `Vidas.revivir`.
 
 ## Estructura (`com.senju.core`)
 
@@ -457,7 +457,7 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] Construir los 4 pilares (2 obsidiana + antorcha de almas). Con obsidiana llorona en un pilar o sin antorcha: sigue faltando estructura. Con fogata de almas apagada: falta; encendida: vale.
 - [ ] De día: mensaje de que solo es de noche; `ritualDeNoche = false`: ya no lo pide. En el Nether con `ritualDeNoche = true`: siempre falta la noche.
 - [ ] Menos jugadores de `jugadoresRitual` a 8 bloques (o alguno en espectador/muerto): mensaje "Faltan jugadores (x de y)".
-- [ ] Sin tótem: mensaje; papel sin nombre / otro objeto en la mano vacía: mensaje de pergamino; nombre de alguien no eliminado o inexistente: "no está eliminado".
+- [ ] Sin tótem: mensaje; papel sin nombre o mano vacía: mensaje de pergamino (con la mano vacía solo esa pista; con la otra mano ocupada se puede colocar bloques); nombre de alguien no eliminado o inexistente: "no está eliminado".
 - [ ] Varias cosas faltando a la vez: un mensaje por cada una.
 - [ ] Todo correcto: se gasta 1 papel y 1 tótem, rayo sin daño ni fuego, partículas, sonido; N vuelve con `vidasAlRevivir` vidas sobre el altar y sale el aviso "HA RESUCITADO" una sola vez (conectado, y también desconectado: al entrar).
 - [ ] Con un bloque o herramienta en la mano, el clic derecho no inicia el ritual. Servidor dedicado: arranca sin errores.
