@@ -37,5 +37,19 @@
   "senjucore.prohibidos.quitado": "%s permitió: %s",
   "senjucore.prohibidos.noplaca": "La Placa de Staff no se puede prohibir.",
   "senjucore.confiscado.jugador": "Se te quitó un objeto prohibido: %s x%s",
-  "senjucore.confiscado.staff": "Se confiscó a %s: %s x%s"
+  "senjucore.confiscado.staff": "Se confiscó a %s: %s x%s",
+  "senjucore.menu.prohibidos": "Objetos prohibidos",
+  "senjucore.menu.prohibidos.desc": "Coloca aquí los ítems que no se pueden tener",
+  "senjucore.menu.selector": "Elegir jugador",
+  "senjucore.menu.verinv": "Inventario de %s",
+  "senjucore.menu.verender": "Cofre de ender de %s",
+  "senjucore.menu.volver": "Volver",
+  "senjucore.menu.anterior": "Página anterior",
+  "senjucore.menu.siguiente": "Página siguiente",
+  "senjucore.menu.ender": "Cofre de ender",
+  "senjucore.menu.actualizar": "Actualizar",
+  "senjucore.menu.quitar": "Clic para permitir de nuevo",
+  "senjucore.menu.marcaprohibido": "⚠ Objeto prohibido",
+  "senjucore.menu.placa": "Placa de Staff",
+  "senjucore.verinv.desconectado": "%s se desconectó."
 }

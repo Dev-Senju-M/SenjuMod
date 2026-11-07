@@ -97,7 +97,13 @@ de cada tick del servidor (antes que las tolvas) y, si un no staff ve la placa e
 
 ## Menú del staff
 
-Clic derecho con la Placa abre "Panel de Staff" (cofre de 3 filas; `MenuStaff` sobre `MenuType.GENERIC_9x3`, el cliente usa la pantalla vanilla). Botones: Castigar (slot 10) e Inventario (16) muestran "Próximamente" en la barra de acción; Vanish (13, poción: brilla si está activo) alterna Vanish; Cerrar (22). `clicked` nunca llama a `super`: ningún tipo de clic mueve ítems ni deja nada en el cursor; solo un clic simple (PICKUP) en un botón actúa. Se cierra solo si pierdes staff. Los botones nunca son placas (compatible con `ProteccionPlaca`).
+Clic derecho con la Placa abre "Panel de Staff" (cofre de 3 filas; `MenuStaff` sobre `MenuType.GENERIC_9x3`, el cliente usa la pantalla vanilla). Botones: Castigar (slot 10) y Objetos prohibidos (19) muestran "Próximamente" en la barra de acción; Revisar inventario (16) abre el selector de jugador; Vanish (13, poción: brilla si está activo) alterna Vanish; Cerrar (22). `clicked` nunca llama a `super`: ningún tipo de clic mueve ítems ni deja nada en el cursor; solo un clic simple (PICKUP) en un botón actúa. Se cierra solo si pierdes staff. Los botones nunca son placas (compatible con `ProteccionPlaca`).
+
+### Revisar inventario
+
+Todos los menús del staff extienden `MenuSoloLectura` (base común: `clicked` sin `super`, solo PICKUP en slots del menú llega a `alClicar`, `quickMoveStack` vacío, `stillValid` = staff, cursor limpio y `sendAllDataToRemote()` tras cada clic). Revisar inventario (Panel, slot 16) abre `MenuSelector`: cabezas (con el perfil y skin) de los jugadores conectados por orden alfabético, 45 por página; Volver (45), Página anterior (48), Página siguiente (50). Clic en una cabeza abre `MenuVerInventario`: copia del inventario con la misma disposición que `DisposicionInventario` (0-26 principal, 27-35 barra, 36-39 casco a botas, 40 mano secundaria), relleno en 41-44; Volver (45) regresa al selector en la misma página, Cofre de ender (49) abre `MenuVerEnder` (6 filas: contenido en las 3 primeras, Volver en 45 hacia la vista de inventario), Actualizar (53). Los ítems prohibidos llevan una línea roja "Objeto prohibido" solo en la copia. La vista se refresca cada 20 ticks desde `broadcastChanges()` del propio menú (se reconstruyen las copias y solo viajan los slots que cambian); el objetivo se resuelve por UUID en cada refresco, y si se desconectó se avisa y se vuelve al selector (muerte y cambio de dimensión no dejan referencias obsoletas).
+
+Placa de Staff: nunca se coloca una copia de la Placa en un contenedor de menú, porque `ProteccionPlaca` revisa los slots ajenos cada tick y se la "extraería" al espectador, duplicándola. En su lugar se muestra un papel gris "Placa de Staff" (`CopiaVista`).
 
 ## Vanish
 
@@ -125,7 +131,7 @@ Límites: las esferas de experiencia aún pueden desviarse hacia el jugador en V
 - `network`: `Red`, `PaqueteTiempo`, `PaqueteInfoServidor`.
 - `cliente`: `PanelHud`, `Teclas`, `EventosCliente`, `DatosCliente`, `Posicion`, `Formato`.
 - `staff`: `Staff`, `ReglaStaff` (lógica pura), `ItemsMod`, `PlacaStaffItem`, `ProteccionPlaca`, `ComandoStaff`.
-- `staff.menu`: `AccionMenu` (lógica pura), `MenuStaff` (menú), `BotonesMenu` (ítems).
+- `staff.menu`: `AccionMenu`, `Paginacion`, `DisposicionInventario` (lógica pura), `MenuSoloLectura` (base), `MenuStaff`, `MenuSelector`, `MenuVerInventario`, `MenuVerEnder` (menús), `BotonesMenu`, `CopiaVista` (ítems).
 - `staff.vanish`: `ReglaVanish` (lógica pura), `RegistroVanish` (guardado), `Vanish` (estado, visibilidad, eventos).
 - `mixin`: `ServerPlayerMixin`, `PlayerListMixin`, `ServerGamePacketListenerImplMixin` (ocultación de Vanish).
 
@@ -187,6 +193,17 @@ Arranca `runServer` y `runClient` y entra a `localhost`.
 - [ ] Ningún clic mueve ítems: shift+clic (en menú e inventario propio), arrastre (clic mantenido), teclas 1-9, F (mano secundaria), Q (soltar), doble clic, clic central (creativo), clic fuera de la ventana. Cursor siempre vacío.
 - [ ] Con el menú abierto, `deop` al jugador (si no está en `staff`): el menú se cierra.
 - [ ] Cerrar con Esc/E no devuelve ni pierde nada; la Placa sigue intacta en el inventario.
+
+### Revisar inventario (hacen falta dos jugadores, S staff y N normal)
+- [ ] S: Panel > Revisar inventario abre "Elegir jugador" con la cabeza (skin) de cada jugador conectado, por orden alfabético; Volver regresa al Panel. Entra/sale N: la lista se actualiza en <= 1 s.
+- [ ] Con 46+ conectados (o bots): dos páginas; Siguiente/Anterior solo aparecen cuando existen; volver desde una vista regresa a la misma página.
+- [ ] Clic en la cabeza de N: "Inventario de N" con su inventario, armadura (36-39) y mano secundaria (40) en su sitio. Mover/gastar ítems en N se refleja en <= 1 s sin ítems fantasma; Actualizar refresca al instante.
+- [ ] Ningún clic mueve ítems en estos menús (shift, arrastre, teclas 1-9, F, Q, doble clic); el cursor queda vacío y los originales de N no cambian.
+- [ ] Un ítem prohibido en N muestra la línea roja "Objeto prohibido" solo en la vista (el original de N no la tiene).
+- [ ] Cofre de ender: muestra el contenido en vivo; Volver regresa a la vista de inventario.
+- [ ] N se desconecta, muere o cambia de dimensión con la vista abierta: sin errores en el log; si se desconecta, mensaje "N se desconectó." y vuelve al selector.
+- [ ] S ve a S mismo en el selector: su Placa aparece como papel "Placa de Staff"; cerrar el menú no duplica la Placa. Una Placa en el inventario de otro staff también se ve como papel.
+- [ ] `deop` a S con la vista abierta: el menú se cierra.
 
 ### Vanish (hacen falta dos jugadores)
 

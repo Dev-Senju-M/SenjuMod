@@ -1,7 +1,10 @@
 package com.senju.core.staff.menu;
 
 import net.minecraft.ChatFormatting;
+import com.mojang.authlib.GameProfile;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -15,7 +18,7 @@ import net.minecraft.world.item.alchemy.Potions;
 public final class BotonesMenu {
     private BotonesMenu() {}
 
-    private static MutableComponent nombre(String clave, ChatFormatting color) {
+    static MutableComponent nombre(String clave, ChatFormatting color) {
         return Component.translatable(clave).withStyle(Style.EMPTY.withItalic(false).withColor(color));
     }
 
@@ -23,7 +26,7 @@ public final class BotonesMenu {
         return Component.translatable(clave).withStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.GRAY));
     }
 
-    private static ItemStack boton(ItemStack s, MutableComponent nombre, String descClave) {
+    static ItemStack boton(ItemStack s, MutableComponent nombre, String descClave) {
         s.setHoverName(nombre);
         if (descClave != null) {
             ListTag lore = new ListTag();
@@ -66,5 +69,44 @@ public final class BotonesMenu {
         if (!activo) s.getOrCreateTag().putInt("CustomPotionColor", 0x7F8392);
         return boton(s, nombre(activo ? "senjucore.menu.vanish.on" : "senjucore.menu.vanish.off",
                 activo ? ChatFormatting.GREEN : ChatFormatting.RED), "senjucore.menu.vanish.desc");
+    }
+
+    public static ItemStack prohibidos() {
+        return boton(new ItemStack(Items.TNT), nombre("senjucore.menu.prohibidos", ChatFormatting.GOLD),
+                "senjucore.menu.prohibidos.desc");
+    }
+
+    public static ItemStack volver() {
+        return boton(new ItemStack(Items.ARROW), nombre("senjucore.menu.volver", ChatFormatting.YELLOW), null);
+    }
+
+    public static ItemStack anterior() {
+        return boton(new ItemStack(Items.SPECTRAL_ARROW), nombre("senjucore.menu.anterior", ChatFormatting.WHITE), null);
+    }
+
+    public static ItemStack siguiente() {
+        return boton(new ItemStack(Items.SPECTRAL_ARROW), nombre("senjucore.menu.siguiente", ChatFormatting.WHITE), null);
+    }
+
+    public static ItemStack ender() {
+        return boton(new ItemStack(Items.ENDER_CHEST), nombre("senjucore.menu.ender", ChatFormatting.DARK_PURPLE), null);
+    }
+
+    public static ItemStack actualizar() {
+        return boton(new ItemStack(Items.CLOCK), nombre("senjucore.menu.actualizar", ChatFormatting.GREEN), null);
+    }
+
+    /** Cabeza del jugador (perfil con propiedades, para que se vea su skin). */
+    public static ItemStack cabeza(GameProfile perfil) {
+        ItemStack s = new ItemStack(Items.PLAYER_HEAD);
+        s.getOrCreateTag().put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), perfil));
+        s.setHoverName(Component.literal(perfil.getName())
+                .withStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.WHITE)));
+        return s;
+    }
+
+    /** Marcador que sustituye a una Placa de Staff en las vistas (nunca la placa real ni una copia). */
+    public static ItemStack marcadorPlaca() {
+        return boton(new ItemStack(Items.PAPER), nombre("senjucore.menu.placa", ChatFormatting.GRAY), null);
     }
 }
