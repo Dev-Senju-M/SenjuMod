@@ -97,7 +97,7 @@ de cada tick del servidor (antes que las tolvas) y, si un no staff ve la placa e
 
 ## Menú del staff
 
-Clic derecho con la Placa abre "Panel de Staff" (cofre de 3 filas; `MenuStaff` sobre `MenuType.GENERIC_9x3`, el cliente usa la pantalla vanilla). Botones: Castigar (slot 10) muestra "Próximamente" en la barra de acción; Objetos prohibidos (19, libro y pluma) abre la lista de prohibidos; Revisar inventario (16) abre el selector de jugador; Vanish (13, poción: brilla si está activo) alterna Vanish; Cerrar (22). `clicked` nunca llama a `super`: ningún tipo de clic mueve ítems ni deja nada en el cursor; solo un clic simple (PICKUP) en un botón actúa. Se cierra solo si pierdes staff. Los botones nunca son placas (compatible con `ProteccionPlaca`).
+Clic derecho con la Placa abre "Panel de Staff" (cofre de 3 filas; `MenuStaff` sobre `MenuType.GENERIC_9x3`, el cliente usa la pantalla vanilla). Botones: Castigar (slot 10) abre el asistente de castigo (ver abajo); Objetos prohibidos (19, libro y pluma) abre la lista de prohibidos; Revisar inventario (16) abre el selector de jugador; Vanish (13, poción: brilla si está activo) alterna Vanish; Cerrar (22). `clicked` nunca llama a `super`: ningún tipo de clic mueve ítems ni deja nada en el cursor; solo un clic simple (PICKUP) en un botón actúa. Se cierra solo si pierdes staff. Los botones nunca son placas (compatible con `ProteccionPlaca`).
 
 ### Revisar inventario
 
@@ -140,6 +140,10 @@ Sin rastro (`EventosVanish`): los mobs no lo eligen como objetivo (se les quita 
 Además: su chat (también `/msg`, `/me`, `/say`, `/teammsg`) llega a los no staff como chat sin firma, sin desconectarlos aunque no lo tengan en TAB; los no staff no oyen sus pasos ni los sonidos/eventos que origina él (`PlayerList#broadcast`); su muerte y sus logros solo se anuncian al staff y a la consola (`ServerPlayer#die`, `PlayerAdvancements#award`); no absorbe esferas de experiencia. Con el panel oculto (`H`) la etiqueta VANISH se sigue mostrando sola.
 
 Límites: las esferas de experiencia aún pueden desviarse hacia el jugador en Vanish (no las absorbe) y las flechas en el suelo pueden recogerse (rastros visibles sin tratar); no oculta de `/list`, selectores (`@a`), placas de presión, cables trampa ni sonidos de bloques. La lista de servidores del menú multijugador (número de jugadores y nombres al pasar el ratón) sigue contando e incluyendo a los jugadores en Vanish.
+
+### Castigar (asistente de menús)
+
+Castigar abre `MenuSelector` en modo `CASTIGAR` (el modo `INVENTARIO` no cambia) y sigue: `MenuElegirCastigo` (3 filas: cabeza + Silenciar/Expulsar/Banear/Congelar/Cárcel/Quitar horas; el lore marca "Activo: quedan X") -> `MenuDuracion` (10 min, 1 h, 1 día, 7 días, Permanente; Quitar horas: 30 min, 1 h, 2 h, Todo el día; Expulsar lo salta) -> `MenuMotivo` (un papel por entrada de `motivos`, paginado; lista vacía = "Otro") -> `MenuConfirmar` (resumen + Aplicar verde / Cancelar rojo). El estado del asistente viaja solo en los constructores. Únicamente Aplicar llama a `Castigos.aplicar`; Volver retrocede un paso y Cancelar vuelve al panel sin aplicar. Elegir a un staff en el selector muestra `esstaff` en la barra y no abre nada; sin cárcel fijada muestra `sincarcel`. Tras aplicar se abre el panel (otro id de ventana) y un flag `aplicado` descarta clics repetidos.
 
 ## Castigar: efectos
 
@@ -229,7 +233,7 @@ Arranca `runServer` y `runClient` y entra a `localhost`.
 
 ### Menú del staff
 - [ ] Clic derecho con la Placa abre "Panel de Staff"; un no staff con una placa (obtenida a escondidas) no abre nada.
-- [ ] Clic izquierdo y derecho en Castigar: "Próximamente" en la barra; Cerrar cierra; clic en cristal gris no hace nada (sin tooltip).
+- [ ] Cerrar cierra; clic en cristal gris no hace nada (sin tooltip).
 - [ ] Clic en la poción alterna Vanish: cambia nombre (activado/desactivado) y brillo al instante; el panel muestra/oculta VANISH. Tooltip sin texto de efecto.
 - [ ] Ningún clic mueve ítems: shift+clic (en menú e inventario propio), arrastre (clic mantenido), teclas 1-9, F (mano secundaria), Q (soltar), doble clic, clic central (creativo), clic fuera de la ventana. Cursor siempre vacío.
 - [ ] Con el menú abierto, `deop` al jugador (si no está en `staff`): el menú se cierra.
@@ -294,6 +298,15 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] Banear a N 1 h (conectado): se desconecta con "baneado hasta <fecha>"; al reintentar entrar lo vuelve a expulsar con fecha y motivo. Banear permanente: dice "permanente".
 - [ ] Banear a N (desconectado) y que entre: expulsado al entrar. Ban de 1 m vencido estando desconectado: al entrar puede jugar y ve "Tu castigo de Banear terminó.".
 - [ ] Quitar 30 m a N (con límite activo en servidor dedicado): el panel baja 30 m. "Todo el día" lo expulsa con el mensaje del límite. Con N desconectado se aplica al entrar.
+
+### Castigar: menús (S staff, N no staff, T otro staff)
+- [ ] Panel > Castigar abre el selector; clic en la cabeza de T: "El staff no puede ser castigado" en la barra y no abre nada. Revisar inventario sigue abriendo el inventario.
+- [ ] Clic en N: 6 botones; uno ya activo muestra "Activo: quedan ..." y se actualiza.
+- [ ] Silenciar > 10 min > motivo > Confirmar muestra cabeza "Castigar a N" con castigo, duración y motivo; Aplicar lo aplica y vuelve al panel; doble clic rápido en Aplicar aplica una sola vez (un registro en el historial).
+- [ ] Expulsar salta la duración; Quitar horas ofrece 30 min / 1 h / 2 h / Todo el día y el resumen dice "todo el día".
+- [ ] Volver en cada paso retrocede un paso; Cancelar vuelve al panel y no aplica nada (comprobar `/staff historial` o el log).
+- [ ] Cárcel sin fijar: Aplicar muestra "No hay cárcel fijada" y no registra nada.
+- [ ] Con más de 45 motivos en la config aparecen las flechas de página; con la lista vacía hay un único "Otro".
 
 ### Congelar y cárcel (S staff, N no staff)
 - [ ] Congelar N 10 m: N no puede andar, saltar, agacharse para bajar ni volar: vuelve a su punto; puede girar la cabeza y hablar. Barra "Estás congelado" cada segundo.

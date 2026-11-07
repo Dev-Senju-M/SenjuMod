@@ -63,7 +63,10 @@ public class MenuStaff extends MenuSoloLectura {
                 MenuProhibidos.abrir(sp, 0);
                 return false;
             }
-            case CASTIGAR -> sp.displayClientMessage(Component.translatable("senjucore.menu.proximamente"), true);
+            case CASTIGAR -> {
+                MenuSelector.abrir(sp, 0, MenuSelector.Modo.CASTIGAR);
+                return false;
+            }
             case CERRAR -> {
                 sp.closeContainer();
                 return false;

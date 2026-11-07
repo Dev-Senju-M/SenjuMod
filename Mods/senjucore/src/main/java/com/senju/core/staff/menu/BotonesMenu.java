@@ -1,5 +1,6 @@
 package com.senju.core.staff.menu;
 
+import java.util.List;
 import net.minecraft.ChatFormatting;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
@@ -48,7 +49,7 @@ public final class BotonesMenu {
 
     public static ItemStack castigar() {
         return boton(new ItemStack(Items.IRON_AXE), nombre("senjucore.menu.castigar", ChatFormatting.RED),
-                "senjucore.menu.proximamente");
+                "senjucore.menu.castigar.desc");
     }
 
     public static ItemStack inventario() {
@@ -122,5 +123,32 @@ public final class BotonesMenu {
         return boton(new ItemStack(Items.BARRIER),
                 Component.literal(id).withStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.RED)),
                 "senjucore.menu.quitar");
+    }
+
+    /** Botón con nombre y varias líneas de lore ya construidas (sin cursiva, gris). */
+    static ItemStack botonLore(ItemStack s, Component nombre, List<Component> lore) {
+        s.setHoverName(nombre);
+        if (!lore.isEmpty()) {
+            ListTag l = new ListTag();
+            for (Component c : lore) {
+                l.add(StringTag.valueOf(Component.Serializer.toJson(
+                        c.copy().withStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.GRAY)))));
+            }
+            s.getOrCreateTagElement("display").put("Lore", l);
+        }
+        for (ItemStack.TooltipPart parte : ItemStack.TooltipPart.values()) s.hideTooltipPart(parte);
+        return s;
+    }
+
+    static Component nombreComp(Component c, ChatFormatting color) {
+        return c.copy().withStyle(Style.EMPTY.withItalic(false).withColor(color));
+    }
+
+    public static ItemStack aplicar() {
+        return boton(new ItemStack(Items.LIME_CONCRETE), nombre("senjucore.menu.castigo.aplicar", ChatFormatting.GREEN), null);
+    }
+
+    public static ItemStack cancelar() {
+        return boton(new ItemStack(Items.RED_CONCRETE), nombre("senjucore.menu.castigo.cancelar", ChatFormatting.RED), null);
     }
 }
