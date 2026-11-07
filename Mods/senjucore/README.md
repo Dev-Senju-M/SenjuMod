@@ -107,9 +107,9 @@ Se hace con Mixin (`com.senju.core.mixin`, config `senjucore.mixins.json`): `Ser
 (entidad), `PlayerList#placeNewPlayer` (TAB y mensaje de entrada) y `ServerGamePacketListenerImpl#onDisconnect`
 (mensaje de salida). Si un Mixin no se aplica, el juego falla al arrancar (no en silencio).
 
-Sin rastro (`EventosVanish`): los mobs no lo eligen como objetivo (se les quita el objetivo cada 20 ticks en 32 bloques), no recoge ítems del suelo y abre cofres (también dobles y trampa), barriles y shulkers en silencio: sin sonido, sin animación de tapa y sin señal de redstone. Respeta candados, cofre bloqueado y shulker obstruida. Agachado con un ítem en la mano se comporta como vanilla. El cofre de ender no cambia.
+Sin rastro (`EventosVanish`): los mobs no lo eligen como objetivo (se les quita el objetivo cada 20 ticks en 64 bloques), no recoge ítems del suelo y abre cofres (también dobles y trampa), barriles y shulkers en silencio: sin sonido, sin animación de tapa y sin señal de redstone. Respeta candados, cofre bloqueado y shulker obstruida. Agachado con un ítem en la mano se comporta como vanilla. También el cofre de ender (sin sonido ni tapa). Los mobs con cerebro (Warden, Piglin, Hoglin...) pierden también su objetivo y su ira.
 
-Límites: no oculta de `/list`, selectores (`@a`), placas de presión, cables trampa ni sonidos de bloques.
+Límites: las esferas de experiencia siguen volando hacia el jugador en Vanish y las flechas en el suelo pueden recogerse (rastros visibles sin tratar); no oculta de `/list`, selectores (`@a`), placas de presión, cables trampa ni sonidos de bloques.
 
 ## Estructura (`com.senju.core`)
 

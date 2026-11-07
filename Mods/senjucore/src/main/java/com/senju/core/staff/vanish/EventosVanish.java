@@ -8,6 +8,8 @@ import net.minecraft.world.Container;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.NeutralMob;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
@@ -17,10 +19,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.DoubleBlockCombiner;
+import net.minecraft.world.level.block.EnderChestBlock;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -33,7 +37,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 /** Vanish sin rastro: los mobs no lo persiguen, no recoge items y abre contenedores en silencio. */
 public class EventosVanish {
-    private static final double RADIO_MOBS = 32.0;
+    private static final double RADIO_MOBS = 64.0;
     private int ticks = 0;
 
     // ---- Mobs ----
@@ -53,6 +57,15 @@ public class EventosVanish {
             AABB zona = p.getBoundingBox().inflate(RADIO_MOBS);
             for (Mob m : p.serverLevel().getEntitiesOfClass(Mob.class, zona)) {
                 if (m.getTarget() == p) m.setTarget(null);
+                // Mobs con cerebro (Warden, Piglin, Hoglin...) guardan el objetivo en memoria.
+                var cerebro = m.getBrain();
+                if (cerebro.getMemory(MemoryModuleType.ATTACK_TARGET).filter(t -> t == p).isPresent()) {
+                    cerebro.eraseMemory(MemoryModuleType.ATTACK_TARGET);
+                }
+                if (cerebro.getMemory(MemoryModuleType.ANGRY_AT).filter(u -> u.equals(p.getUUID())).isPresent()) {
+                    cerebro.eraseMemory(MemoryModuleType.ANGRY_AT);
+                }
+                if (m instanceof NeutralMob n && p.getUUID().equals(n.getPersistentAngerTarget())) n.stopBeingAngry();
             }
         }
     }
@@ -79,6 +92,8 @@ public class EventosVanish {
         boolean manejado;
         if (estado.getBlock() instanceof ChestBlock cofre) {
             manejado = abrirCofre(p, cofre, estado, level, pos);
+        } else if (estado.getBlock() instanceof EnderChestBlock) {
+            manejado = abrirEnder(p, level, pos);
         } else if (estado.getBlock() instanceof BarrelBlock) {
             manejado = abrirBarril(p, level, pos);
         } else if (estado.getBlock() instanceof ShulkerBoxBlock) {
@@ -132,6 +147,20 @@ public class EventosVanish {
         boolean doble = partes.size() == 2;
         p.openMenu(new SimpleMenuProvider((id, inv, jug) ->
                 doble ? ChestMenu.sixRows(id, inv, proxy) : ChestMenu.threeRows(id, inv, proxy), titulo));
+        return true;
+    }
+
+    private static boolean abrirEnder(ServerPlayer p, Level level, BlockPos pos) {
+        BlockEntity be = level.getBlockEntity(pos);
+        if (!(be instanceof EnderChestBlockEntity ender)) return false;
+        BlockPos arriba = pos.above();
+        if (level.getBlockState(arriba).isRedstoneConductor(level, arriba)) return true; // bloqueado
+        var inventario = p.getEnderChestInventory();
+        // Como vanilla: stillValid del inventario depende del cofre activo (distancia / bloque roto).
+        inventario.setActiveChest(ender);
+        Container proxy = new ContenedorSilencioso(inventario);
+        p.openMenu(new SimpleMenuProvider((id, inv, jug) -> ChestMenu.threeRows(id, inv, proxy),
+                Component.translatable("container.enderchest")));
         return true;
     }
 
