@@ -90,7 +90,9 @@ hueco libre o, si no lo hay, en el cursor cuando está vacío; si no, espera (nu
 servidor se reinicia con un jugador muerto sin reaparecer, se pierden, igual que las guardadas para un jugador desconectado (`pendientes`); se recupera con `/staff placa`.
 
 Limitación: en modo creativo, la papelera o la cuadrícula de ítems del inventario creativo pueden
-borrar la placa (es del cliente); se recupera con `/staff placa`. Los contenedores se revisan al inicio
+borrar la placa, y el clic central puede clonarla (el creativo lo controla el cliente, el servidor no
+se entera); se recupera con `/staff placa`. Las pruebas de protección (morir, tirar, cofres) hazlas en
+**supervivencia**. Los contenedores se revisan al inicio
 de cada tick del servidor (antes que las tolvas) y, si un no staff ve la placa en un contenedor, se descarta.
 
 ## Estructura (`com.senju.core`)
