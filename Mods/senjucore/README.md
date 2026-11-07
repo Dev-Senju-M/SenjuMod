@@ -210,12 +210,40 @@ Castigar abre `MenuSelector` en modo `CASTIGAR` (el modo `INVENTARIO` no cambia)
 - **Staff**: nunca se teletransporta ni se bloquea (defensivo, aunque no se le pueda castigar).
 - Notas: solo se bloquean los comandos que escribe el preso; un `/execute as <preso> run ...` del staff NO se cancela (brigadier conserva la fuente del staff en el contexto raíz). Un preso o congelado no puede ser movido de dimensión por el staff (el viaje se cancela) y un `/tp` en la misma dimensión se deshace en el siguiente tick: perdonar primero.
 
+## Altar Dracónico y ritual de resurrección
+
+Bloque `senjucore:altar_draconico` (pestaña de bloques funcionales; dureza de obsidiana 50/1200, luz 10, hace falta pico de diamante; suelta el propio bloque; partículas de llama en el cliente).
+
+**Receta** (con forma): `C` obsidiana llorona, `G` bloque de oro, `E` ojo de ender, `T` tótem de la inmortalidad.
+
+```
+ C C C
+ G E G
+ G T G
+```
+
+**Estructura** (4 pilares en las diagonales a 2 bloques del altar, `A`): cada pilar son 2 bloques de **obsidiana** (la llorona no cuenta) con una **antorcha de almas** o una **fogata de almas encendida** encima. El fuego de almas suelto se apaga sobre obsidiana, por eso lo realista es antorcha o fogata. Vista desde arriba (x, z) y de lado:
+
+```
+ F . . . F        F = antorcha/fogata de almas  (altura 3)
+ . . . . .        O = obsidiana x2              (alturas 1 y 2)
+ . . A . .        A = altar                     (altura 1, mismo nivel que la base de los pilares)
+ . . . . .
+ F . . . F
+```
+
+**Ritual** (clic derecho al altar con la mano principal; con otro objeto en la mano se comporta como un bloque normal):
+1. Sostener un **papel renombrado** (yunque) con el nombre exacto del jugador eliminado (no distingue mayúsculas; el jugador debe haber entrado alguna vez al servidor).
+2. Estructura completa, **de noche** (solo Overworld; en otra dimensión con `ritualDeNoche=true` siempre falta "noche"), al menos `jugadoresRitual` jugadores vivos y no espectadores a 8 bloques o menos del centro del altar (el que lo activa cuenta; el staff cuenta como jugador), y un **tótem** en el inventario del que lo activa (principal u offhand).
+3. Si algo falta, se envía un mensaje por cada cosa que falta y **no se consume nada**. Si todo está bien: se consume 1 papel y 1 tótem, rayo solo visual, partículas de fuego y sonido de tótem, y el jugador revive con `vidasAlRevivir` vidas sobre el altar (conectado: en el acto; desconectado: al entrar). El aviso "HA RESUCITADO" lo emite `Vidas.revivir`.
+
 ## Estructura (`com.senju.core`)
 
 - `config`: `CommonConfig`, `ClientConfig`.
 - `tiempo`: `ReglaTiempo` (lógica pura), `EstadoTiempo`, `RegistroTiempo` (guardado), `ControlTiempo` (eventos del servidor), `ComandoTiempo`.
 - `network`: `Red`, `PaqueteTiempo`, `PaqueteInfoServidor`, `PaqueteVanish`, `PaqueteAviso`, `PaqueteVidas`.
 - `vidas`: `ReglaVidas`, `TipoAviso` (lógica pura), `RegistroVidas` (guardado), `Vidas` (servicio), `EventosVidas`, `ComandoVidas`.
+- `vidas.altar`: `EstructuraAltar`, `ReglaRitual` (lógica pura), `AltarDraconicoBlock`, `BloquesMod`, `Ritual`.
 - `cliente`: `PanelHud`, `Teclas`, `EventosCliente`, `DatosCliente`, `Posicion`, `Formato`.
 - `cliente.aviso`: `LineaTiempoAviso` (lógica pura), `AvisoDraconico` (overlay, cola, brasas).
 - `staff`: `Staff`, `ReglaStaff` (lógica pura), `ItemsMod`, `PlacaStaffItem`, `ProteccionPlaca`, `ComandoStaff`.
@@ -225,7 +253,7 @@ Castigar abre `MenuSelector` en modo `CASTIGAR` (el modo `INVENTARIO` no cambia)
 - `staff.vanish`: `ReglaVanish` (lógica pura), `RegistroVanish` (guardado), `Vanish` (estado, visibilidad, eventos).
 - `mixin`: `ServerPlayerMixin`, `PlayerListMixin`, `ServerGamePacketListenerImplMixin` (ocultación de Vanish).
 
-Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest`, `EfectosTest`, `ReglaStaffTest`, `ReglaVanishTest`, `AccionMenuTest`, `PaginacionTest`, `DisposicionInventarioTest`, `ListaProhibidosTest`, `DuracionTest`, `EstadoCastigosTest`, `ReglaPosicionTest`, `ReglaVidasTest`, `LineaTiempoAvisoTest`.
+Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest`, `EfectosTest`, `ReglaStaffTest`, `ReglaVanishTest`, `AccionMenuTest`, `PaginacionTest`, `DisposicionInventarioTest`, `ListaProhibidosTest`, `DuracionTest`, `EstadoCastigosTest`, `ReglaPosicionTest`, `ReglaVidasTest`, `LineaTiempoAvisoTest`, `EstructuraAltarTest`, `ReglaRitualTest`.
 
 ## Pruebas dentro del juego (checklist)
 
@@ -422,3 +450,14 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] Panel: línea "Vidas:" con huevos llenos/agrietados que cambia al morir o con `fijar`; con `vidasStaff = false` siendo staff la línea no aparece. `fijar Dev 20`: un huevo y "20/20".
 - [ ] El nombre del título se ve grande (~15 px de mayúscula) y legible con escala de GUI 2, 3 y 4; nombres largos se reducen para caber.
 - [ ] Servidor dedicado (`runServer`) arranca sin errores de clases de cliente.
+
+### Altar Dracónico y ritual (S staff o creativo, N eliminado, 2 jugadores más; con `jugadoresRitual = 1` para ir solo)
+- [ ] El altar sale en la pestaña de bloques funcionales; se craftea con `CCC / GEG / GTG`; con pico de hierro no suelta nada, con diamante se suelta; emite luz y llamas.
+- [ ] Papel renombrado con el nombre de N (eliminado), sin estructura: mensaje de estructura; no se consume papel ni tótem.
+- [ ] Construir los 4 pilares (2 obsidiana + antorcha de almas). Con obsidiana llorona en un pilar o sin antorcha: sigue faltando estructura. Con fogata de almas apagada: falta; encendida: vale.
+- [ ] De día: mensaje de que solo es de noche; `ritualDeNoche = false`: ya no lo pide. En el Nether con `ritualDeNoche = true`: siempre falta la noche.
+- [ ] Menos jugadores de `jugadoresRitual` a 8 bloques (o alguno en espectador/muerto): mensaje "Faltan jugadores (x de y)".
+- [ ] Sin tótem: mensaje; papel sin nombre / otro objeto en la mano vacía: mensaje de pergamino; nombre de alguien no eliminado o inexistente: "no está eliminado".
+- [ ] Varias cosas faltando a la vez: un mensaje por cada una.
+- [ ] Todo correcto: se gasta 1 papel y 1 tótem, rayo sin daño ni fuego, partículas, sonido; N vuelve con `vidasAlRevivir` vidas sobre el altar y sale el aviso "HA RESUCITADO" una sola vez (conectado, y también desconectado: al entrar).
+- [ ] Con un bloque o herramienta en la mano, el clic derecho no inicia el ritual. Servidor dedicado: arranca sin errores.

@@ -28,9 +28,13 @@ public class SenjuCore {
         ctx.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC, "senjucore-client.toml");
         modBus.addListener((FMLCommonSetupEvent e) -> e.enqueueWork(Red::registrar));
         com.senju.core.staff.ItemsMod.ITEMS.register(modBus);
+        com.senju.core.vidas.altar.BloquesMod.BLOQUES.register(modBus);
+        com.senju.core.vidas.altar.BloquesMod.ITEMS.register(modBus);
         modBus.addListener((BuildCreativeModeTabContentsEvent e) -> {
             if (e.getTabKey() == CreativeModeTabs.OP_BLOCKS && e.hasPermissions())
                 e.accept(com.senju.core.staff.ItemsMod.PLACA_STAFF);
+            if (e.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS)
+                e.accept(com.senju.core.vidas.altar.BloquesMod.ALTAR_DRACONICO_ITEM);
         });
         MinecraftForge.EVENT_BUS.register(new com.senju.core.staff.ComandoStaff());
         MinecraftForge.EVENT_BUS.register(new com.senju.core.staff.ProteccionPlaca());

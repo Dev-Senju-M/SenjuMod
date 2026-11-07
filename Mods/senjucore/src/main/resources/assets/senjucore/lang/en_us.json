@@ -121,5 +121,13 @@
   "senjucore.aviso.muerte": "HA CAÍDO · LE QUEDAN %s",
   "senjucore.aviso.eliminado": "HA SIDO DEVORADO · ELIMINADO",
   "senjucore.aviso.resucitado": "HA RESUCITADO · VIDAS: %s",
-  "senjucore.panel.vidas": "Vidas:"
+  "senjucore.panel.vidas": "Vidas:",
+  "senjucore.ritual.estructura": "Falta la estructura: cuatro pilares de 2 bloques de obsidiana con una antorcha o fogata de almas encima, a 2 bloques del altar en diagonal.",
+  "senjucore.ritual.noche": "Solo se puede hacer el ritual de noche en el Overworld.",
+  "senjucore.ritual.jugadores": "Faltan jugadores cerca del altar (%s de %s).",
+  "senjucore.ritual.totem": "Falta un Tótem de la inmortalidad en tu inventario.",
+  "senjucore.ritual.pergamino": "Sostén un papel renombrado con el nombre del jugador a resucitar.",
+  "senjucore.ritual.noeliminado": "%s no está eliminado.",
+  "senjucore.ritual.completado": "Ritual completado: %s regresa de entre los muertos.",
+  "block.senjucore.altar_draconico": "Altar Dracónico"
 }
