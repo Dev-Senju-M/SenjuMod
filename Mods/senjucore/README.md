@@ -85,8 +85,8 @@ o desde la pestaña creativa de operadores.
 
 Protección (servidor): no se tira (Q, arrastrar fuera, creativo), no se queda en contenedores, marcos ni
 soportes ni en un Allay (clic derecho bloqueado), se conserva al morir, y a quien no es staff se le elimina (revisión cada 1 s) con aviso.
-Si no cabe en el inventario va al cursor; si el cursor está ocupado queda pendiente en memoria y vuelve
-en cuanto haya hueco (nunca se suelta al suelo). Las placas apartadas al morir viven en memoria: si el
+Si no cabe en el inventario queda pendiente en memoria y el siguiente tick del jugador la pone en un
+hueco libre o, si no lo hay, en el cursor cuando está vacío; si no, espera (nunca se suelta al suelo). Las placas apartadas al morir viven en memoria: si el
 servidor se reinicia con un jugador muerto sin reaparecer, se pierden, igual que las guardadas para un jugador desconectado (`pendientes`); se recupera con `/staff placa`.
 
 Limitación: en modo creativo, la papelera o la cuadrícula de ítems del inventario creativo pueden
@@ -144,7 +144,7 @@ Arranca `runServer` y `runClient` y entra a `localhost`.
 - [ ] Tolva bajo un cofre: no se puede sacar por la tolva; shulker box: igual.
 - [ ] Clic derecho con la placa en un marco y en un soporte de armadura: no pasa nada.
 - [ ] Morir con la placa (con y sin `keepInventory`): reaparece con una sola placa, sin ítem en el suelo.
-- [ ] Inventario lleno y placa en un cofre: aparece en el cursor; con el cursor ocupado se devuelve al liberarlo.
+- [ ] Inventario lleno y placa en un cofre: al cerrar el cofre queda pendiente y en el siguiente tick aparece en el cursor (o en un hueco al liberarlo).
 - [ ] `/give` a un jugador no staff: desaparece en <= 1 s con el aviso.
 - [ ] Quitar a alguien de `staff` / hacerle deop: pierde la placa (también en mano secundaria y cursor).
 - [ ] Consola: `/staff placa <jugador>` funciona.

@@ -28,23 +28,31 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 /**
  * Mantiene la Placa de Staff con su dueño (todo en el servidor).
  *
- * Regla de devolución: hueco libre del inventario; si no, cursor; si el cursor también está
- * ocupado, la placa queda en una lista de pendientes en memoria y se reintenta cada tick hasta que
- * haya hueco o el cursor quede libre. Nunca se crea un ItemEntity.
+ * Regla de devolución: hueco libre del inventario; si no, pendientes en memoria; el tick del
+ * jugador reintenta cada tick y, si sigue sin hueco, usa el cursor cuando está vacío (nunca al cerrar
+ * un menú). Nunca se crea un ItemEntity.
  */
 public class ProteccionPlaca {
     /** Placas apartadas de los drops al morir; se devuelven en PlayerEvent.Clone. */
     private final Map<UUID, List<ItemStack>> alMorir = new HashMap<>();
-    /** Placas que no cupieron ni en inventario ni en cursor; se reintentan cada tick. */
+    /** Placas que no cupieron en el inventario; se reintentan cada tick. */
     private final Map<UUID, List<ItemStack>> pendientes = new HashMap<>();
 
-    /** Devuelve la placa al jugador sin soltarla jamás al suelo. */
+    /**
+     * Devuelve la placa sin soltarla jamás al suelo y sin usar nunca el cursor (puede llamarse mientras
+     * un menú se cierra y el cursor se perdería). Orden: muerto -> alMorir; no staff -> se descarta;
+     * hueco libre -> inventario; si no -> pendientes.
+     */
     private void devolver(ServerPlayer p, ItemStack placa) {
-        if (!Staff.esStaff(p)) return; // nunca a un no staff: se descarta
+        devolver(p, placa, false);
+    }
+
+    private void devolver(ServerPlayer p, ItemStack placa, boolean permitirCursor) {
         if (!p.isAlive()) { // muerto: el inventario no pasa al reaparecer, se devuelve en Clone
             alMorir.computeIfAbsent(p.getUUID(), k -> new ArrayList<>()).add(placa);
             return;
         }
+        if (!Staff.esStaff(p)) return; // nunca a un no staff: se descarta
         Inventory inv = p.getInventory();
         // No usar inv.add(): en creativo descarta el stack si no hay hueco.
         int libre = inv.getFreeSlot();
@@ -52,18 +60,18 @@ public class ProteccionPlaca {
             inv.setItem(libre, placa);
             return;
         }
-        AbstractContainerMenu menu = p.containerMenu;
-        if (menu.getCarried().isEmpty()) {
-            menu.setCarried(placa);
+        if (permitirCursor && p.containerMenu.getCarried().isEmpty()) {
+            p.containerMenu.setCarried(placa);
             return;
         }
         pendientes.computeIfAbsent(p.getUUID(), k -> new ArrayList<>()).add(placa);
     }
 
+    /** Solo desde el tick del jugador (ningún menú cerrándose): aquí sí se puede usar el cursor. */
     private void reintentarPendientes(ServerPlayer p) {
         List<ItemStack> lista = pendientes.remove(p.getUUID());
         if (lista == null) return;
-        for (ItemStack s : lista) devolver(p, s);
+        for (ItemStack s : lista) devolver(p, s, true);
     }
 
     // --- Tirar (Q, arrastrar fuera, inventario creativo) ---
