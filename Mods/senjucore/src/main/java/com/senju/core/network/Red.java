@@ -28,6 +28,12 @@ public final class Red {
         CANAL.registerMessage(id++, PaqueteVanish.class, PaqueteVanish::encode,
                 PaqueteVanish::decode, PaqueteVanish::handle,
                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        CANAL.registerMessage(id++, PaqueteAviso.class, PaqueteAviso::encode,
+                PaqueteAviso::decode, PaqueteAviso::handle,
+                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        CANAL.registerMessage(id++, PaqueteVidas.class, PaqueteVidas::encode,
+                PaqueteVidas::decode, PaqueteVidas::handle,
+                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
 
     public static void enviarA(ServerPlayer p, Object paquete) {

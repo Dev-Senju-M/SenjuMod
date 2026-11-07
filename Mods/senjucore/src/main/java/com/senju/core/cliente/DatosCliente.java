@@ -1,5 +1,9 @@
 package com.senju.core.cliente;
 
+import com.senju.core.network.PaqueteAviso;
+import java.util.ArrayDeque;
+import java.util.Deque;
+
 /** Estado del panel en el cliente. Solo cliente; no cargar desde el servidor dedicado. */
 public final class DatosCliente {
     private static String nombreServidor = "";
@@ -9,6 +13,9 @@ public final class DatosCliente {
     private static boolean tieneDatos = false;
     private static boolean vanish = false;
     private static int ticks = 0;
+    private static int vidas = -1;
+    private static int vidasTotal = 0;
+    private static final Deque<PaqueteAviso> AVISOS = new ArrayDeque<>();
 
     private DatosCliente() {}
 
@@ -18,6 +25,18 @@ public final class DatosCliente {
     public static long usadosHoy() { return usadosHoy; }
     public static boolean tieneDatos() { return tieneDatos; }
     public static boolean vanish() { return vanish; }
+
+    /** Vidas propias; -1 = el servidor no las envía / exento. */
+    public static int vidas() { return vidas; }
+    public static int vidasTotal() { return vidasTotal; }
+    public static void setVidas(int v, int total) { vidas = v; vidasTotal = total; }
+
+    /** Cola de avisos dracónicos pendientes; la tarea del overlay la vacía (hilo de cliente). */
+    public static Deque<PaqueteAviso> avisos() { return AVISOS; }
+    public static void encolarAviso(PaqueteAviso a) {
+        AVISOS.addLast(a);
+        while (AVISOS.size() > 20) AVISOS.removeFirst();
+    }
 
     public static void setVanish(boolean activo) { vanish = activo; }
 
@@ -50,5 +69,8 @@ public final class DatosCliente {
         tieneDatos = false;
         vanish = false;
         ticks = 0;
+        vidas = -1;
+        vidasTotal = 0;
+        AVISOS.clear();
     }
 }

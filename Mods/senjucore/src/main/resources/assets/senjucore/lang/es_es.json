@@ -108,5 +108,14 @@
   "senjucore.comando.historial.accion.perdonar": "perdonó",
   "senjucore.comando.historial.accion.vencer": "venció",
   "senjucore.comando.banear.sinmotivo": "Escribe un motivo para el ban.",
-  "senjucore.comando.banear.varios": "Banear solo admite un jugador a la vez."
+  "senjucore.comando.banear.varios": "Banear solo admite un jugador a la vez.",
+  "senjucore.vidas.rechazo": "Fuiste eliminado de la serie. Espera a que te resuciten.",
+  "senjucore.vidas.unjugador": "Indica un solo jugador.",
+  "senjucore.vidas.ver": "%s tiene %s vidas",
+  "senjucore.vidas.ver.eliminado": "%s está eliminado (0 vidas)",
+  "senjucore.vidas.ver.pendiente": "%s está eliminado; revivirá con %s vidas cuando esté conectado",
+  "senjucore.vidas.fijado": "Vidas de %s fijadas en %s",
+  "senjucore.vidas.noeliminado": "%s no está eliminado",
+  "senjucore.vidas.revivido": "%s ha sido resucitado con %s vidas",
+  "senjucore.vidas.revivido.pendiente": "%s revivirá con %s vidas al entrar"
 }

@@ -37,6 +37,11 @@ Se generan en `run/config/` (desarrollo) o `config/` (instalación normal) al ar
 | `horasDiarias` | `6.0` (0.01 a 24) | Horas de juego permitidas por día |
 | `avisosMinutos` | `[10, 1]` | Minutos restantes en que se avisa en el chat |
 | `eximirOperadores` | `false` | Si es `true`, los operadores no tienen límite |
+| `vidasIniciales` | `3` (1 a 100) | Vidas de cada jugador nuevo (no cambia a los ya registrados) |
+| `vidasAlRevivir` | `1` (1 a 100) | Vidas al resucitar por el ritual (lo usa el Altar Dracónico) |
+| `vidasStaff` | `true` | Si es `false`, el staff no pierde vidas ni puede quedar eliminado |
+| `jugadoresRitual` | `3` (1 a 20) | Jugadores vivos cerca del altar para el ritual |
+| `ritualDeNoche` | `true` | El ritual solo se puede hacer de noche |
 
 `senjucore-client.toml` (cada jugador):
 
@@ -74,6 +79,17 @@ Funcionan también con jugadores desconectados (por ejemplo, uno ya expulsado po
 - `/staff historial <jugador>`: últimos 10 registros, del más reciente: `yyyy-MM-dd HH:mm · <acción> <tipo> (<duración>) · <motivo> · por <staff>`; sin registros: "Sin historial: <nombre>". La acción sale como aplicó / perdonó / venció.
 - `/staff carcel fijar`: fija la cárcel en tu posición (dimensión, xyz y rotación). Solo jugadores (la consola recibe error).
 - `/staff banear <jugador> <duración> <motivo...>`: banea también a desconectados y desde la consola. Duración `10m`, `1h`, `1d`, `7d` o `perm` (`<n>m|h|d`); si es inválida muestra los ejemplos. El motivo es texto libre y obligatorio. Solo admite un jugador (un selector con varios, como @a, da error). No se puede banear a staff.
+- `/staff vidas <jugador>`: muestra sus vidas (o "eliminado", o "revivirá con N al entrar"). Solo un jugador.
+- `/staff vidas fijar <jugador> <n>`: fija las vidas (0 a 100). `0` elimina (espectador); `>0` desde 0 revive (en su punto de reaparición).
+- `/staff revivir <jugador> <n>`: revive con `n` vidas (1 a 100) a un eliminado. Conectado: supervivencia y traslado a su punto de reaparición en el acto; desconectado: queda pendiente y se aplica al entrar (antes del rechazo). Si no está eliminado, da error.
+
+## Vidas
+
+Cada jugador tiene vidas persistentes (`senjucore_vidas`, Overworld): `vidasIniciales` al primer acceso. `EventosVidas` cuenta cada muerte una sola vez con `LivingDeathEvent` (servidor, `ServerPlayer` real, no cancelado, prioridad mínima; el tótem de la inmortalidad evita la muerte, así que no descuenta). Un eliminado no vuelve a contar. Cada muerte envía `PaqueteAviso(nombre, vidas, total, MUERTE|ELIMINADO|RESUCITADO)` a **todos** los jugadores (el aviso en pantalla es la tarea 2) y `PaqueteVidas(vidas, total)` al propio jugador (HUD; `-1` si está exento por `vidasStaff=false`).
+
+- **Eliminado (0 vidas)**: al reaparecer pasa a espectador (en el primer tick, no dentro de `PlayerRespawnEvent`). Cada 20 ticks, si no está en espectador (p. ej. `/gamemode`), vuelve a espectador. Si se desconecta, al entrar se le rechaza con "Fuiste eliminado de la serie. Espera a que te resuciten." (el anfitrión de un mundo local no se expulsa de su propio mundo: queda en espectador). Límite: igual que el ban, el aviso "X se unió/abandonó" se ve brevemente.
+- **Revivir**: guarda `pendienteRevivir` (+ posición opcional); se aplica en el momento que el jugador está conectado y vivo (login, o tick): vidas, supervivencia, traslado a la posición o a su punto de reaparición (cama/ancla válida, o spawn del mundo) y aviso `RESUCITADO`.
+- **Exentos**: con `vidasStaff=false`, el staff (`Castigos.esStaff`, incluye al anfitrión local) no pierde vidas ni queda eliminado.
 
 ## Comportamiento
 
@@ -178,7 +194,8 @@ Castigar abre `MenuSelector` en modo `CASTIGAR` (el modo `INVENTARIO` no cambia)
 
 - `config`: `CommonConfig`, `ClientConfig`.
 - `tiempo`: `ReglaTiempo` (lógica pura), `EstadoTiempo`, `RegistroTiempo` (guardado), `ControlTiempo` (eventos del servidor), `ComandoTiempo`.
-- `network`: `Red`, `PaqueteTiempo`, `PaqueteInfoServidor`.
+- `network`: `Red`, `PaqueteTiempo`, `PaqueteInfoServidor`, `PaqueteVanish`, `PaqueteAviso`, `PaqueteVidas`.
+- `vidas`: `ReglaVidas`, `TipoAviso` (lógica pura), `RegistroVidas` (guardado), `Vidas` (servicio), `EventosVidas`, `ComandoVidas`.
 - `cliente`: `PanelHud`, `Teclas`, `EventosCliente`, `DatosCliente`, `Posicion`, `Formato`.
 - `staff`: `Staff`, `ReglaStaff` (lógica pura), `ItemsMod`, `PlacaStaffItem`, `ProteccionPlaca`, `ComandoStaff`.
 - `staff.menu`: `AccionMenu`, `Paginacion`, `DisposicionInventario` (lógica pura), `MenuSoloLectura` (base), `MenuStaff`, `MenuSelector`, `MenuVerInventario`, `MenuVerEnder`, `MenuProhibidos` (menús), `BotonesMenu`, `CopiaVista` (ítems).
@@ -187,7 +204,7 @@ Castigar abre `MenuSelector` en modo `CASTIGAR` (el modo `INVENTARIO` no cambia)
 - `staff.vanish`: `ReglaVanish` (lógica pura), `RegistroVanish` (guardado), `Vanish` (estado, visibilidad, eventos).
 - `mixin`: `ServerPlayerMixin`, `PlayerListMixin`, `ServerGamePacketListenerImplMixin` (ocultación de Vanish).
 
-Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest`, `EfectosTest`, `ReglaStaffTest`, `ReglaVanishTest`, `AccionMenuTest`, `PaginacionTest`, `DisposicionInventarioTest`, `ListaProhibidosTest`, `DuracionTest`, `EstadoCastigosTest`, `ReglaPosicionTest` (82 en total).
+Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest`, `EfectosTest`, `ReglaStaffTest`, `ReglaVanishTest`, `AccionMenuTest`, `PaginacionTest`, `DisposicionInventarioTest`, `ListaProhibidosTest`, `DuracionTest`, `EstadoCastigosTest`, `ReglaPosicionTest`, `ReglaVidasTest`.
 
 ## Pruebas dentro del juego (checklist)
 
@@ -360,3 +377,16 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] `/staff historial N` muestra aplicar, perdonar y vencer, del más reciente, máximo 10; sin registros: "Sin historial: <nombre>". La acción sale como aplicó / perdonó / venció. Texto en español, igual con idioma inglés.
 - [ ] Recorrido completo: fijar cárcel, castigar a N desde el panel con cada uno de los 6 castigos, verificar efecto, perdonar con el comando, revisar `logs/senjucore-castigos.log` (una línea por acción, sin saltos raros en motivos).
 - [ ] Todo sobrevive a reiniciar el servidor (silencio, ban, congelado, cárcel, historial).
+
+### Vidas (S staff, N no staff, M otro jugador; opcional `vidasIniciales = 2` para ir más rápido)
+- [ ] N entra por primera vez: tiene `vidasIniciales`. `/staff vidas N` lo confirma. Cambiar la config después no altera a N.
+- [ ] N muere (lava, mob): `/staff vidas N` baja 1; solo cuenta una vez. M y N reciben el paquete de aviso (visible en la tarea 2).
+- [ ] N con un tótem de la inmortalidad en la mano al recibir daño letal: sobrevive y NO pierde vida.
+- [ ] N muere con su última vida: al reaparecer queda en espectador. `/gamemode survival` (con op): en un segundo vuelve a espectador.
+- [ ] N eliminado muere otra vez en espectador (vacío o `/kill`): sigue en 0, sin vidas negativas.
+- [ ] N eliminado se desconecta y vuelve a entrar: lo rechaza con "Fuiste eliminado de la serie. Espera a que te resuciten."
+- [ ] `/staff revivir N 2` con N conectado (espectador): supervivencia, 2 vidas, en su punto de reaparición. Con N desconectado: al entrar aparece vivo con 2 vidas.
+- [ ] `/staff revivir N 2` sobre alguien con vidas: error "no está eliminado".
+- [ ] `/staff vidas fijar N 0` elimina a N conectado (espectador, aviso); `fijar N 3` lo revive. Un selector con varios jugadores da error.
+- [ ] `vidasStaff = false`: S muere varias veces y no pierde vidas.
+- [ ] Reiniciar el servidor conserva vidas, eliminados y revivires pendientes.

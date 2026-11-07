@@ -54,6 +54,8 @@ public class ComandoStaff {
                                 .then(Commands.argument("duracion", StringArgumentType.word())
                                         .then(Commands.argument("motivo", StringArgumentType.greedyString())
                                                 .executes(ComandoStaff::banear)))))
+                .then(com.senju.core.vidas.ComandoVidas.vidas())
+                .then(com.senju.core.vidas.ComandoVidas.revivir())
                 .then(Commands.literal("vanish")
                         .executes(c -> {
                             com.senju.core.staff.vanish.Vanish.alternar(c.getSource().getPlayerOrException());
