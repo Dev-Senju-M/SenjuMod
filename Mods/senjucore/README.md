@@ -84,10 +84,14 @@ Es staff quien sea operador nivel 2+ (si `staffIncluyeOperadores = true`) o est�
 o desde la pestaña creativa de operadores.
 
 Protección (servidor): no se tira (Q, arrastrar fuera, creativo), no se queda en contenedores, marcos ni
-soportes, se conserva al morir, y a quien no es staff se le elimina (revisión cada 1 s) con aviso.
+soportes ni en un Allay (clic derecho bloqueado), se conserva al morir, y a quien no es staff se le elimina (revisión cada 1 s) con aviso.
 Si no cabe en el inventario va al cursor; si el cursor está ocupado queda pendiente en memoria y vuelve
 en cuanto haya hueco (nunca se suelta al suelo). Las placas apartadas al morir viven en memoria: si el
 servidor se reinicia con un jugador muerto sin reaparecer, se pierden (se recupera con `/staff placa`).
+
+Limitación: en modo creativo, la papelera o la cuadrícula de ítems del inventario creativo pueden
+borrar la placa (es del cliente); se recupera con `/staff placa`. Los contenedores se revisan al inicio
+de cada tick del servidor (antes que las tolvas) y, si un no staff ve la placa en un contenedor, se descarta.
 
 ## Estructura (`com.senju.core`)
 

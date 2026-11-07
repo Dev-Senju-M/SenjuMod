@@ -9,6 +9,7 @@ import java.util.UUID;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -38,6 +39,7 @@ public class ProteccionPlaca {
 
     /** Devuelve la placa al jugador sin soltarla jamás al suelo. */
     private void devolver(ServerPlayer p, ItemStack placa) {
+        if (!Staff.esStaff(p)) return; // nunca a un no staff: se descarta
         Inventory inv = p.getInventory();
         // No usar inv.add(): en creativo descarta el stack si no hay hueco.
         int libre = inv.getFreeSlot();
@@ -66,7 +68,17 @@ public class ProteccionPlaca {
         if (!PlacaStaffItem.esPlaca(item)) return;
         // Cancelar solo elimina la entidad; hay que devolver el ítem a mano.
         ev.setCanceled(true);
-        if (ev.getPlayer() instanceof ServerPlayer p) devolver(p, item.copy());
+        if (!(ev.getPlayer() instanceof ServerPlayer p)) return;
+        ItemStack copia = item.copy();
+        if (!p.isAlive()) {
+            // Murió con la placa en el cursor: se devuelve en Clone al reaparecer.
+            alMorir.computeIfAbsent(p.getUUID(), k -> new ArrayList<>()).add(copia);
+        } else if (p.hasDisconnected()) {
+            // Desconectando: el inventario ya se guardó; queda pendiente en memoria.
+            pendientes.computeIfAbsent(p.getUUID(), k -> new ArrayList<>()).add(copia);
+        } else {
+            devolver(p, copia);
+        }
     }
 
     // --- Muerte ---
@@ -100,8 +112,48 @@ public class ProteccionPlaca {
             quitarATodos(p);
             return;
         }
-        sacarDeContenedores(p);
         reintentarPendientes(p);
+    }
+
+    /**
+     * Antes de cualquier tick de nivel (tolvas, soltadores, etc.) se revisan los contenedores
+     * abiertos. Primero el staff (recupera su placa), después los no staff (la placa se descarta,
+     * nunca se les entrega).
+     */
+    @SubscribeEvent
+    public void alTickServidor(TickEvent.ServerTickEvent ev) {
+        if (ev.phase != TickEvent.Phase.START) return;
+        List<ServerPlayer> jugadores = ev.getServer().getPlayerList().getPlayers();
+        for (ServerPlayer p : new ArrayList<>(jugadores)) {
+            if (Staff.esStaff(p)) sacarDeContenedores(p);
+        }
+        for (ServerPlayer p : new ArrayList<>(jugadores)) {
+            if (!Staff.esStaff(p)) sacarDeContenedores(p);
+        }
+    }
+
+    /** Antes de guardar al jugador: la placa del cursor o de un contenedor pasa al inventario. */
+    @SubscribeEvent
+    public void alSalir(PlayerEvent.PlayerLoggedOutEvent ev) {
+        if (!(ev.getEntity() instanceof ServerPlayer p)) return;
+        Inventory inv = p.getInventory();
+        List<ItemStack> sueltas = new ArrayList<>();
+        AbstractContainerMenu menu = p.containerMenu;
+        if (PlacaStaffItem.esPlaca(menu.getCarried())) {
+            sueltas.add(menu.getCarried().copy());
+            menu.setCarried(ItemStack.EMPTY);
+        }
+        for (Slot slot : menu.slots) {
+            if (slot.container != inv && PlacaStaffItem.esPlaca(slot.getItem())) {
+                sueltas.add(slot.getItem().copy());
+                slot.set(ItemStack.EMPTY);
+            }
+        }
+        for (ItemStack s : sueltas) {
+            int libre = inv.getFreeSlot();
+            if (libre >= 0) inv.setItem(libre, s);
+            else pendientes.computeIfAbsent(p.getUUID(), k -> new ArrayList<>()).add(s);
+        }
     }
 
     /** Ningún slot que no sea del inventario del jugador (incluida la cuadrícula 2x2) puede tener la placa. */
@@ -113,7 +165,7 @@ public class ProteccionPlaca {
             if (PlacaStaffItem.esPlaca(s)) {
                 ItemStack placa = s.copy();
                 slot.set(ItemStack.EMPTY);
-                devolver(p, placa);
+                devolver(p, placa); // devolver() descarta si p no es staff
             }
         }
     }
@@ -157,6 +209,7 @@ public class ProteccionPlaca {
     }
 
     private static boolean bloquea(ItemStack mano, Entity objetivo) {
-        return PlacaStaffItem.esPlaca(mano) && (objetivo instanceof ItemFrame || objetivo instanceof ArmorStand);
+        return PlacaStaffItem.esPlaca(mano) && (objetivo instanceof ItemFrame || objetivo instanceof ArmorStand
+                || objetivo instanceof Allay);
     }
 }
