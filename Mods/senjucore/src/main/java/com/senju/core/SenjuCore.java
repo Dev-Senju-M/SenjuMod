@@ -34,6 +34,7 @@ public class SenjuCore {
         });
         MinecraftForge.EVENT_BUS.register(new com.senju.core.staff.ComandoStaff());
         MinecraftForge.EVENT_BUS.register(new com.senju.core.staff.ProteccionPlaca());
+        MinecraftForge.EVENT_BUS.register(new com.senju.core.staff.prohibidos.Confiscacion());
         MinecraftForge.EVENT_BUS.register(new ControlTiempo());
         MinecraftForge.EVENT_BUS.register(new com.senju.core.staff.vanish.Vanish());
         MinecraftForge.EVENT_BUS.register(new com.senju.core.staff.vanish.EventosVanish());
