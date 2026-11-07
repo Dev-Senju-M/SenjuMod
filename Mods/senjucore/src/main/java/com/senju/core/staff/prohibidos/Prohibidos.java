@@ -4,6 +4,7 @@ import java.util.List;
 import com.senju.core.staff.PlacaStaffItem;
 import com.senju.core.staff.Staff;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
@@ -37,9 +38,10 @@ public final class Prohibidos {
     public static boolean quitar(ServerPlayer staff, String id) {
         if (!RegistroProhibidos.de(staff.server).quitar(id)) return false;
         Component nombre = Component.literal(id);
-        Item item = ForgeRegistries.ITEMS.getValue(new net.minecraft.resources.ResourceLocation(id));
-        if (item != null && ForgeRegistries.ITEMS.containsKey(new net.minecraft.resources.ResourceLocation(id))) {
-            nombre = new ItemStack(item).getHoverName();
+        // tryParse: un ID mal formado (lista editada a mano) no debe lanzar excepción.
+        ResourceLocation rl = ResourceLocation.tryParse(id);
+        if (rl != null && ForgeRegistries.ITEMS.containsKey(rl)) {
+            nombre = new ItemStack(ForgeRegistries.ITEMS.getValue(rl)).getHoverName();
         }
         avisar(staff, "senjucore.prohibidos.quitado", nombre);
         return true;

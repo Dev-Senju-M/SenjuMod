@@ -9,6 +9,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
@@ -26,8 +27,9 @@ public final class BotonesMenu {
         return Component.translatable(clave).withStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.GRAY));
     }
 
+    /** @param nombre null conserva el nombre natural del ítem (sin cursiva y con el color de su rareza). */
     static ItemStack boton(ItemStack s, MutableComponent nombre, String descClave) {
-        s.setHoverName(nombre);
+        if (nombre != null) s.setHoverName(nombre);
         if (descClave != null) {
             ListTag lore = new ListTag();
             lore.add(StringTag.valueOf(Component.Serializer.toJson(desc(descClave))));
@@ -72,7 +74,7 @@ public final class BotonesMenu {
     }
 
     public static ItemStack prohibidos() {
-        return boton(new ItemStack(Items.TNT), nombre("senjucore.menu.prohibidos", ChatFormatting.GOLD),
+        return boton(new ItemStack(Items.WRITABLE_BOOK), nombre("senjucore.menu.prohibidos", ChatFormatting.GOLD),
                 "senjucore.menu.prohibidos.desc");
     }
 
@@ -108,5 +110,17 @@ public final class BotonesMenu {
     /** Marcador que sustituye a una Placa de Staff en las vistas (nunca la placa real ni una copia). */
     public static ItemStack marcadorPlaca() {
         return boton(new ItemStack(Items.PAPER), nombre("senjucore.menu.placa", ChatFormatting.GRAY), null);
+    }
+
+    /** Ítem de la lista de prohibidos (tipo conocido, nunca la Placa): nombre natural + "Clic para permitir de nuevo". */
+    public static ItemStack listado(Item item) {
+        return boton(new ItemStack(item), null, "senjucore.menu.quitar");
+    }
+
+    /** ID de la lista que no corresponde a un ítem mostrable (quitado del registro, mal formado o la Placa). */
+    public static ItemStack listadoDesconocido(String id) {
+        return boton(new ItemStack(Items.BARRIER),
+                Component.literal(id).withStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.RED)),
+                "senjucore.menu.quitar");
     }
 }

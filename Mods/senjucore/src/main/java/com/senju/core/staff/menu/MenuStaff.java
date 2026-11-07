@@ -59,9 +59,11 @@ public class MenuStaff extends MenuSoloLectura {
                 MenuSelector.abrir(sp, 0);
                 return false;
             }
-            // La Tarea 4 sustituye este aviso por MenuProhibidos.abrir(sp).
-            case CASTIGAR, PROHIBIDOS ->
-                    sp.displayClientMessage(Component.translatable("senjucore.menu.proximamente"), true);
+            case PROHIBIDOS -> {
+                MenuProhibidos.abrir(sp, 0);
+                return false;
+            }
+            case CASTIGAR -> sp.displayClientMessage(Component.translatable("senjucore.menu.proximamente"), true);
             case CERRAR -> {
                 sp.closeContainer();
                 return false;
