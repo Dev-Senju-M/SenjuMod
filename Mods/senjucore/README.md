@@ -107,6 +107,8 @@ Se hace con Mixin (`com.senju.core.mixin`, config `senjucore.mixins.json`): `Ser
 (entidad), `PlayerList#placeNewPlayer` (TAB y mensaje de entrada) y `ServerGamePacketListenerImpl#onDisconnect`
 (mensaje de salida). Si un Mixin no se aplica, el juego falla al arrancar (no en silencio).
 
+Sin rastro (`EventosVanish`): los mobs no lo eligen como objetivo (se les quita el objetivo cada 20 ticks en 32 bloques), no recoge ítems del suelo y abre cofres (también dobles y trampa), barriles y shulkers en silencio: sin sonido, sin animación de tapa y sin señal de redstone. Respeta candados, cofre bloqueado y shulker obstruida. Agachado con un ítem en la mano se comporta como vanilla. El cofre de ender no cambia.
+
 Límites: no oculta de `/list`, selectores (`@a`), placas de presión, cables trampa ni sonidos de bloques.
 
 ## Estructura (`com.senju.core`)
@@ -183,3 +185,7 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] Con S en Vanish, hacer op a N (`op N`): en <= 1 s N ve a S (entidad y TAB). `deop N`: en <= 1 s deja de verlo.
 - [ ] S en Vanish y `deop S` (si `staff` no lo incluye): en <= 1 s se desactiva Vanish y N lo ve.
 - [ ] Reiniciar el servidor con S en Vanish: al entrar S sigue en Vanish y N no lo ve.
+- [ ] S en Vanish abre cofre simple, cofre doble, cofre trampa, barril y shulker: N (cerca) no oye ni ve la tapa abrirse; el contenido se puede mover y se guarda.
+- [ ] S en Vanish con cofre bajo un bloque sólido (o gato sentado) o shulker obstruida: no abre, igual que vanilla. Contenedor con candado: muestra el mensaje y no abre.
+- [ ] S en Vanish agachado con un bloque en la mano sobre un cofre: coloca el bloque (vanilla). Romper el cofre con el menú abierto lo cierra.
+- [ ] Un zombi/esqueleto cercano deja de perseguir a S en <= 1 s; S no recoge ítems del suelo. Al salir de Vanish todo vuelve a la normalidad.
