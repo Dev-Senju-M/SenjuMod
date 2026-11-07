@@ -7,6 +7,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -48,6 +50,14 @@ public final class EventosCliente {
                 cambio = true;
             }
             if (cambio) ClientConfig.SPEC.save();
+        }
+
+        /** Con la pantalla de muerte, el aviso se dibuja encima de ella (el overlay del HUD quedaría debajo). */
+        @SubscribeEvent
+        public static void pantallaMuerte(ScreenEvent.Render.Post e) {
+            if (e.getScreen() instanceof DeathScreen) {
+                AvisoDraconico.frame(e.getGuiGraphics(), e.getScreen().width, e.getScreen().height);
+            }
         }
 
         @SubscribeEvent

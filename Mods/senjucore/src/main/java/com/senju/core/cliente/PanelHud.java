@@ -75,8 +75,7 @@ public final class PanelHud implements IGuiOverlay {
         int vidas = DatosCliente.vidas();
         int vidasTotal = Math.max(1, Math.max(DatosCliente.vidasTotal(), vidas));
         Component cVidas = vidas >= 0 ? txt(I18n.get("senjucore.panel.vidas"), estilo) : null;
-        String vidasNum = vidas + "/" + vidasTotal;
-        Component cVidasNum = txt(vidasNum, estilo);
+        Component cVidasNum = cVidas != null ? txt(vidas + "/" + vidasTotal, estilo) : null;
 
         // El ancho se calcula con el nombre completo (+ cursor) para que no varíe con la animación.
         int anchoServidor = font.width(txt(escribir ? servidor + "_" : servidor, estilo));
@@ -165,6 +164,7 @@ public final class PanelHud implements IGuiOverlay {
             gfx.blit(vidas > 0 ? AvisoDraconico.HUEVO : AvisoDraconico.HUEVO_ROTO, x, y, 0, 0, HUEVO_W, HUEVO_H, HUEVO_W, HUEVO_H);
             gfx.drawString(font, num, x + HUEVO_W + 2, y + 1, 0xFFB38A);
         }
+        RenderSystem.disableBlend();
     }
 
     private static Component txt(String s, Style estilo) {

@@ -105,7 +105,7 @@ Cinzel Decorative 1200–1700 (el espaciado entre letras se cierra hasta 2000) �
 
 - Subtítulos: `HA CAÍDO · LE QUEDAN N`, `HA SIDO DEVORADO · ELIMINADO` (ojo casi cerrado, pupila fina, todos los huevos agrietados), `HA RESUCITADO · VIDAS: N`.
 - Huevos: N llenos y el resto agrietados (hasta 10; con más, un huevo y "N / T").
-- El tiempo del aviso solo corre mientras se ve: la pantalla de pausa y F1 lo ocultan y lo congelan. Otras pantallas (inventario, muerte) se dibujan encima. Avisos seguidos se ven completos, uno detrás de otro.
+- El tiempo del aviso solo corre mientras se ve: la pantalla de pausa y F1 lo ocultan y lo congelan. Con la pantalla de muerte abierta el aviso se dibuja **encima** de ella (los botones de reaparecer siguen funcionando); otras pantallas (inventario, chat, etc.) se dibujan encima del aviso, que sigue corriendo debajo. Avisos seguidos se ven completos, uno detrás de otro.
 - `avisoMuerte = false` (cliente) lo desactiva.
 - **HUD:** el panel añade la línea "Vidas:" con huevos de 8×10 (llenos/agrietados; con más de 10 vidas, un huevo y "N/T") cuando el servidor envía las vidas (`PaqueteVidas`; oculta si eres staff exento).
 - Fuente: Cinzel Decorative Bold (SIL OFL 1.1, `font/OFL-Cinzel.txt`), `font/aviso.json`: `size` 28 (en 1.20.1 `size` es el alto en píxeles de ascenso+descenso: 28 × 700/1348 ≈ 14,5 px de mayúscula), `shift` [0,0], `oversample` 4. Si se ve grande o pequeña, ajusta `size` (no se verificó en el juego).
@@ -416,6 +416,7 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] Mundo local con trucos: `/staff vidas fijar Dev 3` (sin aviso: solo cambia el HUD) y luego `/kill`: aparece el aviso (velo, anillo girando, ojo que se abre, alas, brasas, nombre con letra medieval, "HA CAÍDO · LE QUEDAN 2", 2 huevos llenos y 1 agrietado) y suena el rugido bajo; dura ~5,6 s y se desvanece.
 - [ ] `/staff vidas fijar Dev 0`: "HA SIDO DEVORADO · ELIMINADO", ojo casi cerrado y pupila fina, todos los huevos agrietados. `fijar Dev 3` después: "HA RESUCITADO · VIDAS: 3".
 - [ ] `/staff vidas fijar Dev 0` y enseguida `/staff vidas fijar Dev 2` (o dos muertes casi a la vez con dos jugadores): los avisos salen uno detrás de otro, completos, sin parpadeo ni superposición.
+- [ ] Al morir uno mismo (`/kill`), el aviso se ve encima de la pantalla de muerte, sin oscurecer, y "Reaparecer" se puede pulsar durante el aviso.
 - [ ] Esc (pausa) durante el aviso: se oculta y al volver continúa donde estaba. F1: se oculta.
 - [ ] `avisoMuerte = false` en `senjucore-client.toml`: no hay aviso ni sonido.
 - [ ] Panel: línea "Vidas:" con huevos llenos/agrietados que cambia al morir o con `fijar`; con `vidasStaff = false` siendo staff la línea no aparece. `fijar Dev 20`: un huevo y "20/20".

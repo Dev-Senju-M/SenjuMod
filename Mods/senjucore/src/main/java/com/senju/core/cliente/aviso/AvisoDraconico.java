@@ -10,6 +10,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -59,6 +60,11 @@ public final class AvisoDraconico implements IGuiOverlay {
     private static final List<Brasa> BRASAS = new ArrayList<>();
     private static final Random AZAR = new Random();
     private static float acumuladoBrasas;
+    /** Letras del título ya construidas para {@link #tituloDe} (se rehacen solo al cambiar de aviso). */
+    private static PaqueteAviso tituloDe;
+    private static final List<Component> LETRAS = new ArrayList<>();
+    private static final List<Integer> ANCHOS = new ArrayList<>();
+    private static int anchoLetras;
 
     private static final class Brasa {
         float x, y, vy, amplitud, frecuencia, fase, vida;
@@ -72,6 +78,9 @@ public final class AvisoDraconico implements IGuiOverlay {
         ultimoFrame = -1;
         BRASAS.clear();
         acumuladoBrasas = 0;
+        tituloDe = null;
+        LETRAS.clear();
+        ANCHOS.clear();
     }
 
     @Override
@@ -82,8 +91,26 @@ public final class AvisoDraconico implements IGuiOverlay {
             limpiar();
             return;
         }
+        // En la pantalla de muerte se dibuja encima de ella (EventosCliente, ScreenEvent.Render.Post): aquí ni se
+        // dibuja ni avanza, y no se toca ultimoFrame para que el reloj siga sin salto.
+        if (mc.screen instanceof DeathScreen) return;
         if (mc.options.hideGui || mc.screen instanceof PauseScreen || mc.player == null) {
             ultimoFrame = -1; // congela el tiempo del aviso
+            return;
+        }
+        frame(gfx, w, h);
+    }
+
+    /**
+     * Avanza el reloj y dibuja un frame del aviso. Lo llaman el overlay (HUD) y, con la pantalla de muerte abierta,
+     * el evento de pantalla. Como el overlay no dibuja con la pantalla de muerte, solo uno de los dos corre por frame;
+     * aun así, una segunda llamada en el mismo milisegundo no avanzaría (dt = 0).
+     */
+    public static void frame(GuiGraphics gfx, int w, int h) {
+        Minecraft mc = Minecraft.getInstance();
+        if (!ClientConfig.AVISO_MUERTE.get()) {
+            DatosCliente.avisos().clear();
+            limpiar();
             return;
         }
         long ahora = Util.getMillis();
@@ -143,8 +170,10 @@ public final class AvisoDraconico implements IGuiOverlay {
         float emblema = LineaTiempoAviso.emblema(t);
         float ey = -40f;
 
-        // 3. Alas (desde detrás del anillo, se despliegan girando y creciendo)
-        float alas = LineaTiempoAviso.alas(t);
+        // 3. Alas (desde detrás del anillo, se despliegan girando y creciendo). La geometría usa el valor sin
+        // fundido (no se pliegan al desvanecerse); el fundido va en la opacidad (emblema).
+        float alas = LineaTiempoAviso.alas(t) / Math.max(0.001f, LineaTiempoAviso.fundido(t));
+        alas = Math.min(1f, alas);
         if (alas > 0.01f && emblema > 0.01f) {
             float p = Math.max(0f, Math.min(1f, (alas - 0.3f) / 0.7f));
             float giro = 30f * (1f - p);
@@ -203,7 +232,7 @@ public final class AvisoDraconico implements IGuiOverlay {
 
         // 6. Nombre con letra medieval, resplandor y espaciado que se cierra
         float titulo = LineaTiempoAviso.titulo(t);
-        if (titulo > 0.02f) dibujarTitulo(gfx, font, a.nombre(), titulo, LineaTiempoAviso.espaciadoTitulo(t), 34);
+        if (titulo > 0.02f) dibujarTitulo(gfx, font, a, titulo, LineaTiempoAviso.espaciadoTitulo(t), 34);
 
         // 7. Subtítulo
         float sub = LineaTiempoAviso.subtitulo(t);
@@ -227,19 +256,26 @@ public final class AvisoDraconico implements IGuiOverlay {
         RenderSystem.disableBlend();
     }
 
-    private static void dibujarTitulo(GuiGraphics gfx, Font font, String nombre, float alfa, float espaciado, int y) {
-        List<Component> letras = new ArrayList<>();
-        List<Integer> anchos = new ArrayList<>();
-        int total = 0;
-        for (int i = 0; i < nombre.length(); ) {
-            int cp = nombre.codePointAt(i);
-            i += Character.charCount(cp);
-            Component c = Component.literal(new String(Character.toChars(cp))).withStyle(ESTILO_TITULO);
-            int an = font.width(c);
-            letras.add(c);
-            anchos.add(an);
-            total += an;
+    private static void dibujarTitulo(GuiGraphics gfx, Font font, PaqueteAviso a, float alfa, float espaciado, int y) {
+        if (tituloDe != a) {
+            tituloDe = a;
+            LETRAS.clear();
+            ANCHOS.clear();
+            anchoLetras = 0;
+            String nombre = a.nombre();
+            for (int i = 0; i < nombre.length(); ) {
+                int cp = nombre.codePointAt(i);
+                i += Character.charCount(cp);
+                Component c = Component.literal(new String(Character.toChars(cp))).withStyle(ESTILO_TITULO);
+                int an = font.width(c);
+                LETRAS.add(c);
+                ANCHOS.add(an);
+                anchoLetras += an;
+            }
         }
+        List<Component> letras = LETRAS;
+        List<Integer> anchos = ANCHOS;
+        int total = anchoLetras;
         if (letras.isEmpty()) return;
         float totalF = total + espaciado * (letras.size() - 1);
         float s = Math.min(1f, 280f / Math.max(1f, totalF)); // nombres muy largos: se reducen
@@ -321,7 +357,13 @@ public final class AvisoDraconico implements IGuiOverlay {
         }
     }
 
+    /**
+     * Prepara un grupo de blits con opacidad {@code alfa}. Activa la mezcla cada vez: los fill/drawString previos
+     * vacían {@code RenderType.gui()}/texto y su estado de transparencia la desactiva al terminar.
+     */
     private static void color(float alfa) {
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1f, 1f, 1f, Math.max(0f, Math.min(1f, alfa)));
     }
 
