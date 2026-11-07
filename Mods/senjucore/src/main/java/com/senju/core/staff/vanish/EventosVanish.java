@@ -11,6 +11,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Shulker;
+import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ShulkerBoxMenu;
@@ -59,12 +60,16 @@ public class EventosVanish {
                 if (m.getTarget() == p) m.setTarget(null);
                 // Mobs con cerebro (Warden, Piglin, Hoglin...) guardan el objetivo en memoria.
                 var cerebro = m.getBrain();
-                if (cerebro.getMemory(MemoryModuleType.ATTACK_TARGET).filter(t -> t == p).isPresent()) {
+                // getMemory lanza si el tipo no esta registrado; hasMemoryValue devuelve false en ese caso.
+                if (cerebro.hasMemoryValue(MemoryModuleType.ATTACK_TARGET)
+                        && cerebro.getMemory(MemoryModuleType.ATTACK_TARGET).filter(t -> t == p).isPresent()) {
                     cerebro.eraseMemory(MemoryModuleType.ATTACK_TARGET);
                 }
-                if (cerebro.getMemory(MemoryModuleType.ANGRY_AT).filter(u -> u.equals(p.getUUID())).isPresent()) {
+                if (cerebro.hasMemoryValue(MemoryModuleType.ANGRY_AT)
+                        && cerebro.getMemory(MemoryModuleType.ANGRY_AT).filter(u -> u.equals(p.getUUID())).isPresent()) {
                     cerebro.eraseMemory(MemoryModuleType.ANGRY_AT);
                 }
+                if (m instanceof Warden w) w.clearAnger(p);
                 if (m instanceof NeutralMob n && p.getUUID().equals(n.getPersistentAngerTarget())) n.stopBeingAngry();
             }
         }
@@ -158,7 +163,7 @@ public class EventosVanish {
         var inventario = p.getEnderChestInventory();
         // Como vanilla: stillValid del inventario depende del cofre activo (distancia / bloque roto).
         inventario.setActiveChest(ender);
-        Container proxy = new ContenedorSilencioso(inventario);
+        Container proxy = new ContenedorSilencioso(inventario, jug -> inventario.setActiveChest(null));
         p.openMenu(new SimpleMenuProvider((id, inv, jug) -> ChestMenu.threeRows(id, inv, proxy),
                 Component.translatable("container.enderchest")));
         return true;
@@ -195,9 +200,15 @@ public class EventosVanish {
     /** Delega todo en el contenedor real salvo startOpen/stopOpen (sin sonido, animacion ni senal de redstone). */
     static final class ContenedorSilencioso implements Container {
         private final Container real;
+        private final java.util.function.Consumer<Player> alCerrar;
 
         ContenedorSilencioso(Container real) {
+            this(real, null);
+        }
+
+        ContenedorSilencioso(Container real, java.util.function.Consumer<Player> alCerrar) {
             this.real = real;
+            this.alCerrar = alCerrar;
         }
 
         @Override public int getContainerSize() { return real.getContainerSize(); }
@@ -210,7 +221,7 @@ public class EventosVanish {
         @Override public void setChanged() { real.setChanged(); }
         @Override public boolean stillValid(Player p) { return real.stillValid(p); }
         @Override public void startOpen(Player p) { }
-        @Override public void stopOpen(Player p) { }
+        @Override public void stopOpen(Player p) { if (alCerrar != null) alCerrar.accept(p); }
         @Override public boolean canPlaceItem(int i, ItemStack s) { return real.canPlaceItem(i, s); }
         @Override public boolean canTakeItem(Container destino, int i, ItemStack s) { return real.canTakeItem(destino, i, s); }
         @Override public void clearContent() { real.clearContent(); }
