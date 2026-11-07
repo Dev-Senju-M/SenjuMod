@@ -156,6 +156,7 @@ public final class Vidas {
      */
     static boolean aplicarPendiente(ServerPlayer p) {
         MinecraftServer server = p.server;
+        if (!p.isAlive() || p.hasDisconnected()) return false;
         RegistroVidas reg = RegistroVidas.de(server);
         Datos d = reg.datosSiExisten(p.getUUID());
         if (d == null || d.pendienteRevivir <= 0) return false;

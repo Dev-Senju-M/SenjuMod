@@ -41,6 +41,13 @@ public class EventosVidas {
             d.nombre = p.getGameProfile().getName();
             reg.setDirty();
         }
+        // Otro handler ya lo desconectó en este login (ban, límite diario): no aplicar nada; sigue pendiente.
+        if (p.hasDisconnected()) return;
+        // Entra muerto (salió en la pantalla de muerte): el revivir espera a su primer tick vivo, sin rechazo.
+        if (!p.isAlive() && pendiente(p)) {
+            Vidas.REVISAR.add(p.getUUID());
+            return;
+        }
         // Primero el revivir pendiente, después el rechazo por eliminado.
         if (Vidas.aplicarPendiente(p)) return;
         if (Vidas.eliminado(p.server, p.getGameProfile())) {

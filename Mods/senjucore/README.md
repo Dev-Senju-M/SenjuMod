@@ -89,6 +89,8 @@ Cada jugador tiene vidas persistentes (`senjucore_vidas`, Overworld): `vidasInic
 
 - **Eliminado (0 vidas)**: al reaparecer pasa a espectador (en el primer tick, no dentro de `PlayerRespawnEvent`). Cada 20 ticks, si no está en espectador (p. ej. `/gamemode`), vuelve a espectador. Si se desconecta, al entrar se le rechaza con "Fuiste eliminado de la serie. Espera a que te resuciten." (el anfitrión de un mundo local no se expulsa de su propio mundo: queda en espectador). Límite: igual que el ban, el aviso "X se unió/abandonó" se ve brevemente.
 - **Revivir**: guarda `pendienteRevivir` (+ posición opcional); se aplica en el momento que el jugador está conectado y vivo (login, o tick): vidas, supervivencia, traslado a la posición o a su punto de reaparición (cama/ancla válida, o spawn del mundo) y aviso `RESUCITADO`.
+- **Entra muerto**: si un jugador sale en la pantalla de muerte y lo reviven desconectado, el revivir (y el traslado) espera a su primer tick vivo; si lo desconectó otro handler en el mismo login (ban, límite diario) el revivir sigue pendiente.
+- **Notas**: un traslado de revivir sobre un jugador encarcelado lo deshace la cárcel en el siguiente tick. En un mundo hardcore vanilla fuerza espectador en cada reaparición (no se distingue de la eliminación). Un jugador no eliminado que muere estando en espectador (p. ej. staff con `vidasStaff=true`) pierde una vida. `/staff vidas` de un jugador desconocido no crea registro y muestra `vidasIniciales`.
 - **Exentos**: con `vidasStaff=false`, el staff (`Castigos.esStaff`, incluye al anfitrión local) no pierde vidas ni queda eliminado.
 
 ## Comportamiento

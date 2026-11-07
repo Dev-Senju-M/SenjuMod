@@ -56,17 +56,17 @@ public final class ComandoVidas {
         if (gp == null) return 0;
         CommandSourceStack src = c.getSource();
         String nombre = nombreDe(gp);
-        RegistroVidas.Datos d = RegistroVidas.de(src.getServer()).datos(gp.getId());
-        if (d.pendienteRevivir > 0) {
+        RegistroVidas.Datos d = RegistroVidas.de(src.getServer()).datosSiExisten(gp.getId());
+        int vidas = d == null ? com.senju.core.config.CommonConfig.VIDAS_INICIALES.get() : d.vidas;
+        if (d != null && d.pendienteRevivir > 0) {
             int n = d.pendienteRevivir;
             src.sendSuccess(() -> Component.translatable("senjucore.vidas.ver.pendiente", nombre, n), false);
-        } else if (ReglaVidas.eliminado(d.vidas)) {
+        } else if (ReglaVidas.eliminado(vidas)) {
             src.sendSuccess(() -> Component.translatable("senjucore.vidas.ver.eliminado", nombre), false);
         } else {
-            int v = d.vidas;
-            src.sendSuccess(() -> Component.translatable("senjucore.vidas.ver", nombre, v), false);
+            src.sendSuccess(() -> Component.translatable("senjucore.vidas.ver", nombre, vidas), false);
         }
-        return d.vidas;
+        return vidas;
     }
 
     private static int fijar(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
