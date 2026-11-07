@@ -14,6 +14,7 @@ public final class ClientConfig {
     public static final ForgeConfigSpec.BooleanValue MAQUINA_ESCRIBIR;
     public static final ForgeConfigSpec.BooleanValue RGB;
     public static final ForgeConfigSpec.DoubleValue VELOCIDAD_RGB;
+    public static final ForgeConfigSpec.BooleanValue AVISO_MUERTE;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -26,6 +27,7 @@ public final class ClientConfig {
         MAQUINA_ESCRIBIR = b.define("maquinaEscribir", true);
         RGB = b.define("rgb", true);
         VELOCIDAD_RGB = b.defineInRange("velocidadRgb", 1.0, 0.25, 4.0);
+        AVISO_MUERTE = b.comment("Muestra el aviso dracónico al morir, ser eliminado o resucitar alguien").define("avisoMuerte", true);
         SPEC = b.build();
     }
 

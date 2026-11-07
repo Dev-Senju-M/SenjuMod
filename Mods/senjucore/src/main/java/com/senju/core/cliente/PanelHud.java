@@ -1,5 +1,7 @@
 package com.senju.core.cliente;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.senju.core.cliente.aviso.AvisoDraconico;
 import com.senju.core.config.ClientConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -23,6 +25,8 @@ import java.time.LocalTime;
 public final class PanelHud implements IGuiOverlay {
     private static final int PAD = 4, MARGEN = 4, FONDO = 0x80000000, GRIS = 0xAAAAAA, COLOR_VANISH = 0xB58BFF;
     private static final int ALTO_LINEA = 10;
+    /** Huevos de vida: icono 8×10, paso 9; con más de MAX_HUEVOS se muestra un huevo y "N/T". */
+    private static final int HUEVO_W = 8, HUEVO_H = 10, HUEVO_PASO = 9, MAX_HUEVOS = 10, SEP_VIDAS = 3;
     private static final Style ESTILO_PANEL = Style.EMPTY.withFont(new ResourceLocation("senjucore", "panel"));
 
     @Override
@@ -68,16 +72,22 @@ public final class PanelHud implements IGuiOverlay {
         Component cTiempo = tiempo != null ? txt(tiempo, estilo) : null;
         Component cHora = txt(hora, estilo);
         Component cMisiones = txt(misiones, estilo);
+        int vidas = DatosCliente.vidas();
+        int vidasTotal = Math.max(1, Math.max(DatosCliente.vidasTotal(), vidas));
+        Component cVidas = vidas >= 0 ? txt(I18n.get("senjucore.panel.vidas"), estilo) : null;
+        String vidasNum = vidas + "/" + vidasTotal;
+        Component cVidasNum = txt(vidasNum, estilo);
 
         // El ancho se calcula con el nombre completo (+ cursor) para que no varíe con la animación.
         int anchoServidor = font.width(txt(escribir ? servidor + "_" : servidor, estilo));
         int ancho = Math.max(anchoServidor, 10 + font.width(cNombre));
         if (cTiempo != null) ancho = Math.max(ancho, font.width(cTiempo));
+        if (cVidas != null) ancho = Math.max(ancho, font.width(cVidas) + SEP_VIDAS + anchoHuevos(font, cVidasNum, vidasTotal));
         ancho = Math.max(ancho, Math.max(font.width(cHora), font.width(cMisiones))) + 2 * PAD;
         boolean vanish = DatosCliente.vanish();
         Component cVanish = vanish ? txt(I18n.get("senjucore.panel.vanish"), estilo) : null;
         if (cVanish != null) ancho = Math.max(ancho, font.width(cVanish) + 2 * PAD);
-        int lineas = (tiempo != null ? 5 : 4) + (vanish ? 1 : 0);
+        int lineas = (tiempo != null ? 5 : 4) + (vanish ? 1 : 0) + (cVidas != null ? 1 : 0);
         int alto = lineas * ALTO_LINEA + 2 * PAD - 2;
 
         float escala = ClientConfig.ESCALA.get().floatValue();
@@ -107,6 +117,12 @@ public final class PanelHud implements IGuiOverlay {
             y += ALTO_LINEA;
             linea++;
         }
+        if (cVidas != null) {
+            gfx.drawString(font, cVidas, x, y, rgb ? Efectos.colorRgb(ms, vel, linea * Efectos.DESFASE_LINEA) : 0xFFFFFF);
+            dibujarHuevos(gfx, font, cVidasNum, vidas, vidasTotal, x + font.width(cVidas) + SEP_VIDAS, y - 1);
+            y += ALTO_LINEA;
+            linea++;
+        }
         gfx.drawString(font, cHora, x, y, rgb ? Efectos.colorRgb(ms, vel, linea * Efectos.DESFASE_LINEA) : 0xFFFFFF);
         y += ALTO_LINEA;
         linea++;
@@ -130,6 +146,25 @@ public final class PanelHud implements IGuiOverlay {
             gfx.drawString(font, cVanish, o[0] + PAD, o[1] + PAD, COLOR_VANISH);
         }
         gfx.pose().popPose();
+    }
+
+    private static int anchoHuevos(Font font, Component num, int total) {
+        return total <= MAX_HUEVOS ? total * HUEVO_PASO - 1 : HUEVO_W + 2 + font.width(num);
+    }
+
+    /** Huevos llenos (vidas) y agrietados (resto); con muchas vidas, un huevo y "N/T". */
+    private static void dibujarHuevos(GuiGraphics gfx, Font font, Component num, int vidas, int total, int x, int y) {
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        if (total <= MAX_HUEVOS) {
+            for (int i = 0; i < total; i++) {
+                gfx.blit(i < vidas ? AvisoDraconico.HUEVO : AvisoDraconico.HUEVO_ROTO, x + i * HUEVO_PASO, y,
+                        0, 0, HUEVO_W, HUEVO_H, HUEVO_W, HUEVO_H);
+            }
+        } else {
+            gfx.blit(vidas > 0 ? AvisoDraconico.HUEVO : AvisoDraconico.HUEVO_ROTO, x, y, 0, 0, HUEVO_W, HUEVO_H, HUEVO_W, HUEVO_H);
+            gfx.drawString(font, num, x + HUEVO_W + 2, y + 1, 0xFFB38A);
+        }
     }
 
     private static Component txt(String s, Style estilo) {

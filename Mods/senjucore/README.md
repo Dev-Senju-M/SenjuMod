@@ -55,6 +55,7 @@ Se generan en `run/config/` (desarrollo) o `config/` (instalación normal) al ar
 | `maquinaEscribir` | `true` | El nombre del servidor se escribe y borra como en una máquina de escribir |
 | `rgb` | `true` | Colores RGB animados (`false` = colores clásicos, sin parpadeo) |
 | `velocidadRgb` | `1.0` (0.25 a 4.0) | Velocidad del ciclo de colores |
+| `avisoMuerte` | `true` | Muestra el aviso dracónico (muerte, eliminación, resurrección); `false` lo desactiva y descarta los pendientes |
 
 ## Efectos visuales
 
@@ -85,13 +86,30 @@ Funcionan también con jugadores desconectados (por ejemplo, uno ya expulsado po
 
 ## Vidas
 
-Cada jugador tiene vidas persistentes (`senjucore_vidas`, Overworld): `vidasIniciales` al primer acceso. `EventosVidas` cuenta cada muerte una sola vez con `LivingDeathEvent` (servidor, `ServerPlayer` real, no cancelado, prioridad mínima; el tótem de la inmortalidad evita la muerte, así que no descuenta). Un eliminado no vuelve a contar. Cada muerte envía `PaqueteAviso(nombre, vidas, total, MUERTE|ELIMINADO|RESUCITADO)` a **todos** los jugadores (el aviso en pantalla es la tarea 2) y `PaqueteVidas(vidas, total)` al propio jugador (HUD; `-1` si está exento por `vidasStaff=false`).
+Cada jugador tiene vidas persistentes (`senjucore_vidas`, Overworld): `vidasIniciales` al primer acceso. `EventosVidas` cuenta cada muerte una sola vez con `LivingDeathEvent` (servidor, `ServerPlayer` real, no cancelado, prioridad mínima; el tótem de la inmortalidad evita la muerte, así que no descuenta). Un eliminado no vuelve a contar. Cada muerte envía `PaqueteAviso(nombre, vidas, total, MUERTE|ELIMINADO|RESUCITADO)` a **todos** los jugadores (se muestra como el aviso dracónico, ver abajo) y `PaqueteVidas(vidas, total)` al propio jugador (HUD; `-1` si está exento por `vidasStaff=false`).
 
 - **Eliminado (0 vidas)**: al reaparecer pasa a espectador (en el primer tick, no dentro de `PlayerRespawnEvent`). Cada 20 ticks, si no está en espectador (p. ej. `/gamemode`), vuelve a espectador. Si se desconecta, al entrar se le rechaza con "Fuiste eliminado de la serie. Espera a que te resuciten." (el anfitrión de un mundo local no se expulsa de su propio mundo: queda en espectador). Límite: igual que el ban, el aviso "X se unió/abandonó" se ve brevemente.
 - **Revivir**: guarda `pendienteRevivir` (+ posición opcional); se aplica en el momento que el jugador está conectado y vivo (login, o tick): vidas, supervivencia, traslado a la posición o a su punto de reaparición (cama/ancla válida, o spawn del mundo) y aviso `RESUCITADO`.
 - **Entra muerto**: si un jugador sale en la pantalla de muerte y lo reviven desconectado, el revivir (y el traslado) espera a su primer tick vivo; si lo desconectó otro handler en el mismo login (ban, límite diario) el revivir sigue pendiente.
 - **Notas**: un traslado de revivir sobre un jugador encarcelado lo deshace la cárcel en el siguiente tick. En un mundo hardcore vanilla fuerza espectador en cada reaparición (no se distingue de la eliminación). Un jugador no eliminado que muere estando en espectador (p. ej. staff con `vidasStaff=true`) pierde una vida. `/staff vidas` de un jugador desconocido no crea registro y muestra `vidasIniciales`.
 - **Exentos**: con `vidasStaff=false`, el staff (`Castigos.esStaff`, incluye al anfitrión local) no pierde vidas ni queda eliminado.
+
+## Aviso dracónico y vidas en el HUD
+
+Solo cliente (`cliente.aviso`). Cada `PaqueteAviso` se encola (`DatosCliente.avisos()`, máx. 20) y el overlay
+`senjucore:aviso_draconico` (registrado encima de todo) los muestra de uno en uno, 5,6 s cada uno, con el rugido del
+dragón (vanilla, volumen 0.4) al empezar. Secuencia (`LineaTiempoAviso`, ms): velo rojizo 0–400 → anillo de runas
+(gira despacio) y ojo cerrado 300–700 → el ojo se abre 500–1300 → las alas se despliegan 600–1500 → nombre con
+Cinzel Decorative 1200–1700 (el espaciado entre letras se cierra hasta 2000) → subtítulo 1600–2100 → huevos
+2000–2500 → se desvanece 5000–5600. Brasas (máx. 80) suben desde abajo todo el rato.
+
+- Subtítulos: `HA CAÍDO · LE QUEDAN N`, `HA SIDO DEVORADO · ELIMINADO` (ojo casi cerrado, pupila fina, todos los huevos agrietados), `HA RESUCITADO · VIDAS: N`.
+- Huevos: N llenos y el resto agrietados (hasta 10; con más, un huevo y "N / T").
+- El tiempo del aviso solo corre mientras se ve: la pantalla de pausa y F1 lo ocultan y lo congelan. Otras pantallas (inventario, muerte) se dibujan encima. Avisos seguidos se ven completos, uno detrás de otro.
+- `avisoMuerte = false` (cliente) lo desactiva.
+- **HUD:** el panel añade la línea "Vidas:" con huevos de 8×10 (llenos/agrietados; con más de 10 vidas, un huevo y "N/T") cuando el servidor envía las vidas (`PaqueteVidas`; oculta si eres staff exento).
+- Fuente: Cinzel Decorative Bold (SIL OFL 1.1, `font/OFL-Cinzel.txt`), `font/aviso.json`: `size` 28 (en 1.20.1 `size` es el alto en píxeles de ascenso+descenso: 28 × 700/1348 ≈ 14,5 px de mayúscula), `shift` [0,0], `oversample` 4. Si se ve grande o pequeña, ajusta `size` (no se verificó en el juego).
+- Texturas pixel art en `textures/gui/aviso/` (`ojo_iris`, `pupila`, `anillo`, `ala`, `huevo`, `huevo_roto`).
 
 ## Comportamiento
 
@@ -199,6 +217,7 @@ Castigar abre `MenuSelector` en modo `CASTIGAR` (el modo `INVENTARIO` no cambia)
 - `network`: `Red`, `PaqueteTiempo`, `PaqueteInfoServidor`, `PaqueteVanish`, `PaqueteAviso`, `PaqueteVidas`.
 - `vidas`: `ReglaVidas`, `TipoAviso` (lógica pura), `RegistroVidas` (guardado), `Vidas` (servicio), `EventosVidas`, `ComandoVidas`.
 - `cliente`: `PanelHud`, `Teclas`, `EventosCliente`, `DatosCliente`, `Posicion`, `Formato`.
+- `cliente.aviso`: `LineaTiempoAviso` (lógica pura), `AvisoDraconico` (overlay, cola, brasas).
 - `staff`: `Staff`, `ReglaStaff` (lógica pura), `ItemsMod`, `PlacaStaffItem`, `ProteccionPlaca`, `ComandoStaff`.
 - `staff.menu`: `AccionMenu`, `Paginacion`, `DisposicionInventario` (lógica pura), `MenuSoloLectura` (base), `MenuStaff`, `MenuSelector`, `MenuVerInventario`, `MenuVerEnder`, `MenuProhibidos` (menús), `BotonesMenu`, `CopiaVista` (ítems).
 - `staff.prohibidos`: `ListaProhibidos` (lógica pura), `RegistroProhibidos` (guardado), `Prohibidos` (fachada), `Confiscacion`, `RegistroConfiscados` (log de confiscaciones).
@@ -206,7 +225,7 @@ Castigar abre `MenuSelector` en modo `CASTIGAR` (el modo `INVENTARIO` no cambia)
 - `staff.vanish`: `ReglaVanish` (lógica pura), `RegistroVanish` (guardado), `Vanish` (estado, visibilidad, eventos).
 - `mixin`: `ServerPlayerMixin`, `PlayerListMixin`, `ServerGamePacketListenerImplMixin` (ocultación de Vanish).
 
-Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest`, `EfectosTest`, `ReglaStaffTest`, `ReglaVanishTest`, `AccionMenuTest`, `PaginacionTest`, `DisposicionInventarioTest`, `ListaProhibidosTest`, `DuracionTest`, `EstadoCastigosTest`, `ReglaPosicionTest`, `ReglaVidasTest`.
+Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest`, `EfectosTest`, `ReglaStaffTest`, `ReglaVanishTest`, `AccionMenuTest`, `PaginacionTest`, `DisposicionInventarioTest`, `ListaProhibidosTest`, `DuracionTest`, `EstadoCastigosTest`, `ReglaPosicionTest`, `ReglaVidasTest`, `LineaTiempoAvisoTest`.
 
 ## Pruebas dentro del juego (checklist)
 
@@ -392,3 +411,13 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] `/staff vidas fijar N 0` elimina a N conectado (espectador, aviso); `fijar N 3` lo revive. Un selector con varios jugadores da error.
 - [ ] `vidasStaff = false`: S muere varias veces y no pierde vidas.
 - [ ] Reiniciar el servidor conserva vidas, eliminados y revivires pendientes.
+
+### Aviso dracónico y HUD de vidas (sirve un solo jugador con trucos; `fijar ... 0` y `fijar` desde 0 disparan avisos)
+- [ ] Mundo local con trucos: `/staff vidas fijar Dev 3` (sin aviso: solo cambia el HUD) y luego `/kill`: aparece el aviso (velo, anillo girando, ojo que se abre, alas, brasas, nombre con letra medieval, "HA CAÍDO · LE QUEDAN 2", 2 huevos llenos y 1 agrietado) y suena el rugido bajo; dura ~5,6 s y se desvanece.
+- [ ] `/staff vidas fijar Dev 0`: "HA SIDO DEVORADO · ELIMINADO", ojo casi cerrado y pupila fina, todos los huevos agrietados. `fijar Dev 3` después: "HA RESUCITADO · VIDAS: 3".
+- [ ] `/staff vidas fijar Dev 0` y enseguida `/staff vidas fijar Dev 2` (o dos muertes casi a la vez con dos jugadores): los avisos salen uno detrás de otro, completos, sin parpadeo ni superposición.
+- [ ] Esc (pausa) durante el aviso: se oculta y al volver continúa donde estaba. F1: se oculta.
+- [ ] `avisoMuerte = false` en `senjucore-client.toml`: no hay aviso ni sonido.
+- [ ] Panel: línea "Vidas:" con huevos llenos/agrietados que cambia al morir o con `fijar`; con `vidasStaff = false` siendo staff la línea no aparece. `fijar Dev 20`: un huevo y "20/20".
+- [ ] El nombre del título se ve grande (~15 px de mayúscula) y legible con escala de GUI 2, 3 y 4; nombres largos se reducen para caber.
+- [ ] Servidor dedicado (`runServer`) arranca sin errores de clases de cliente.

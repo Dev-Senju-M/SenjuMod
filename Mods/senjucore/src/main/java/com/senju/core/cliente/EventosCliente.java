@@ -1,6 +1,7 @@
 package com.senju.core.cliente;
 
 import com.senju.core.SenjuCore;
+import com.senju.core.cliente.aviso.AvisoDraconico;
 import com.senju.core.config.ClientConfig;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -26,6 +27,8 @@ public final class EventosCliente {
         @SubscribeEvent
         public static void overlays(RegisterGuiOverlaysEvent e) {
             e.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "panel", new PanelHud());
+            // Evento a pantalla completa: encima de todo (la pantalla de pausa lo oculta).
+            e.registerAboveAll("aviso_draconico", new AvisoDraconico());
         }
     }
 
@@ -50,6 +53,7 @@ public final class EventosCliente {
         @SubscribeEvent
         public static void salir(ClientPlayerNetworkEvent.LoggingOut e) {
             DatosCliente.limpiar();
+            AvisoDraconico.limpiar();
         }
     }
 }

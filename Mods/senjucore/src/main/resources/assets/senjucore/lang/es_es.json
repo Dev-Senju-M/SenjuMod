@@ -117,5 +117,9 @@
   "senjucore.vidas.fijado": "Vidas de %s fijadas en %s",
   "senjucore.vidas.noeliminado": "%s no está eliminado",
   "senjucore.vidas.revivido": "%s ha sido resucitado con %s vidas",
-  "senjucore.vidas.revivido.pendiente": "%s revivirá con %s vidas al entrar"
+  "senjucore.vidas.revivido.pendiente": "%s revivirá con %s vidas al entrar",
+  "senjucore.aviso.muerte": "HA CAÍDO · LE QUEDAN %s",
+  "senjucore.aviso.eliminado": "HA SIDO DEVORADO · ELIMINADO",
+  "senjucore.aviso.resucitado": "HA RESUCITADO · VIDAS: %s",
+  "senjucore.panel.vidas": "Vidas:"
 }
