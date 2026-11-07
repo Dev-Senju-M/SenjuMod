@@ -54,6 +54,7 @@
   "senjucore.menu.placa": "Placa de Staff",
   "senjucore.verinv.desconectado": "%s se desconectó.",
   "senjucore.castigo.esstaff": "El staff no puede ser castigado.",
+  "senjucore.castigo.desconectado": "%s no está conectado.",
   "senjucore.castigo.sincarcel": "No hay cárcel fijada. Usa /staff carcel fijar.",
   "senjucore.castigo.tipo.silencio": "Silenciar",
   "senjucore.castigo.tipo.expulsion": "Expulsar",

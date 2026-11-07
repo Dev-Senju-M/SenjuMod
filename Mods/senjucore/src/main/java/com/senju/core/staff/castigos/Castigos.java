@@ -26,7 +26,7 @@ public final class Castigos {
     private Castigos() {}
 
     /** Resultado de {@link #aplicar}. Todo distinto de OK significa que no se aplicó ni se registró nada. */
-    public enum Resultado { OK, ES_STAFF, SIN_CARCEL, VETADO }
+    public enum Resultado { OK, ES_STAFF, SIN_CARCEL, VETADO, DESCONECTADO }
 
     /** Datos de una aplicación (se entregan a {@link EfectoCastigo#alAplicar}). */
     public record Aplicado(TipoCastigo tipo, long duracionMs, long vence, String motivo, String staff) {}
@@ -55,14 +55,12 @@ public final class Castigos {
     /** Últimas {@code max} entradas, la más reciente primero. */
     public static List<Entrada> historial(MinecraftServer server, UUID id, int max) {
         Datos d = RegistroCastigos.de(server).datosSiExisten(id);
-        List<Entrada> r = new ArrayList<>();
-        if (d == null) return r;
-        for (int i = d.historial.size() - 1; i >= 0 && r.size() < max; i--) r.add(d.historial.get(i));
-        return r;
+        return d == null ? new ArrayList<>() : HistorialLimitado.ultimos(d.historial, max);
     }
 
-    /** Staff para perfiles conectados o no: en la lista {@code staff} u operador (según config). */
+    /** Staff para perfiles conectados o no: anfitrión de un mundo local, en la lista {@code staff} u operador (según config). */
     public static boolean esStaff(MinecraftServer server, GameProfile perfil) {
+        if (server.isSingleplayerOwner(perfil)) return true; // el anfitrión (un invitado LAN no puede castigarlo)
         ServerPlayer on = server.getPlayerList().getPlayer(perfil.getId());
         if (on != null) return Staff.esStaff(on);
         return ReglaStaff.esStaff(server.getPlayerList().isOp(perfil), perfil.getName(),
@@ -192,6 +190,8 @@ public final class Castigos {
         if (v.isEmpty()) return v;
         for (TipoCastigo x : v) {
             reg.agregarHistorial(id, new Entrada(ahora, "-", "VENCER", x, "-", ""));
+            String nom = d.nombre.isEmpty() ? id.toString() : d.nombre;
+            RegistroLogCastigos.anotar(server, "sistema", "VENCER", nom, id.toString(), x.clave(), "-", "");
             if (online != null) {
                 online.sendSystemMessage(Component.translatable("senjucore.castigo.vencido",
                         Component.translatable("senjucore.castigo.tipo." + x.clave())));

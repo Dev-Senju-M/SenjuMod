@@ -194,6 +194,7 @@ public class ComandoStaff {
                     // Con jugador, aplicar ya le avisó; la consola necesita el aviso aquí.
                     if (actor == null) src.sendFailure(Component.translatable("senjucore.castigo.esstaff"));
                 }
+                case DESCONECTADO -> src.sendFailure(Component.translatable("senjucore.castigo.desconectado", nombre));
                 default -> src.sendFailure(Component.translatable("senjucore.comando.banear.fallo", nombre));
             }
         }
@@ -203,7 +204,7 @@ public class ComandoStaff {
     private static Component accionTexto(String accion) {
         return switch (accion) {
             case "APLICAR", "PERDONAR", "VENCER" ->
-                    Component.translatable("senjucore.comando.historial.accion." + accion.toLowerCase());
+                    Component.translatable("senjucore.comando.historial.accion." + accion.toLowerCase(java.util.Locale.ROOT));
             default -> Component.literal(accion);
         };
     }

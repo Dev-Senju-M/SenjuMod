@@ -106,9 +106,7 @@ public class RegistroCastigos extends SavedData {
     }
 
     public void agregarHistorial(UUID id, Entrada e) {
-        List<Entrada> h = datos(id).historial;
-        h.add(e);
-        while (h.size() > MAX_HISTORIAL) h.remove(0);
+        HistorialLimitado.agregar(datos(id).historial, e, MAX_HISTORIAL);
         setDirty();
     }
 

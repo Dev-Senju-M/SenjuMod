@@ -3,7 +3,6 @@ package com.senju.core.staff.castigos;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.senju.core.config.CommonConfig;
-import com.senju.core.staff.Staff;
 import com.senju.core.tiempo.ControlTiempo;
 import com.senju.core.tiempo.EstadoTiempo;
 import com.senju.core.tiempo.RegistroTiempo;
@@ -55,9 +54,20 @@ public class EfectosCastigos {
                 SILENCIOS.remove(id);
             }
         });
-        Castigos.registrarEfecto(TipoCastigo.EXPULSION, (server, id, online, datos) -> {
-            if (online != null) {
-                online.connection.disconnect(Component.translatable("senjucore.castigo.expulsado", datos.motivo()));
+        Castigos.registrarEfecto(TipoCastigo.EXPULSION, new EfectoCastigo() {
+            @Override
+            public Castigos.Resultado puedeAplicar(MinecraftServer server, UUID id, @Nullable ServerPlayer online,
+                    TipoCastigo tipo) {
+                // Se desconectó durante el asistente: no hay a quién expulsar (y no debe quedar en el historial).
+                return online == null ? Castigos.Resultado.DESCONECTADO : Castigos.Resultado.OK;
+            }
+
+            @Override
+            public void alAplicar(MinecraftServer server, UUID id, @Nullable ServerPlayer online,
+                    Castigos.Aplicado datos) {
+                if (online != null) {
+                    online.connection.disconnect(Component.translatable("senjucore.castigo.expulsado", datos.motivo()));
+                }
             }
         });
         Castigos.registrarEfecto(TipoCastigo.BAN, (server, id, online, datos) -> {
@@ -175,7 +185,7 @@ public class EfectosCastigos {
         MinecraftServer server = p.server;
         Castigos.procesarVencidos(server, p.getUUID(), p);
         reconstruirSilencio(server, p.getUUID());
-        if (Castigos.activo(server, p.getUUID(), TipoCastigo.BAN) && !Staff.esStaff(p)) {
+        if (Castigos.activo(server, p.getUUID(), TipoCastigo.BAN) && !Castigos.esStaff(server, p.getGameProfile())) {
             p.connection.disconnect(mensajeBan(Castigos.vence(server, p.getUUID(), TipoCastigo.BAN),
                     motivoActivo(server, p.getUUID(), TipoCastigo.BAN)));
             return;

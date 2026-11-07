@@ -1,6 +1,5 @@
 package com.senju.core.staff.castigos;
 
-import com.senju.core.staff.Staff;
 import com.senju.core.staff.castigos.RegistroCastigos.Datos;
 import com.senju.core.staff.castigos.RegistroCastigos.Posicion;
 import java.util.EnumSet;
@@ -104,7 +103,7 @@ public class CongelarYCarcel {
                     d.retornoCarcel = posicionDe(online);
                     reg.setDirty();
                 }
-                if (!Staff.esStaff(online)) llevarACarcel(online, d, reg);
+                if (!Castigos.esStaff(server, online.getGameProfile())) llevarACarcel(online, d, reg);
             }
 
             @Override
@@ -230,7 +229,7 @@ public class CongelarYCarcel {
             reg.setDirty();
         }
         if (!preso && !congelado) return false;
-        if (!p.isAlive() || Staff.esStaff(p)) return false;
+        if (!p.isAlive() || Castigos.esStaff(p.server, p.getGameProfile())) return false;
 
         if (preso) {
             Posicion c = reg.carcel();
@@ -248,7 +247,9 @@ public class CongelarYCarcel {
 
         if (congelado) {
             Posicion f = d.posCongelado;
-            Posicion c = preso ? reg.carcel() : null;
+            Posicion rc = preso ? reg.carcel() : null;
+            // Sin cárcel válida (no fijada o dimensión desaparecida) se comporta como solo congelado.
+            Posicion c = rc != null && nivel(server, rc.dimension()) != null ? rc : null;
             boolean invalido = f == null || nivel(server, f.dimension()) == null
                     || (c != null && !dentroCarcel(f.dimension(), f.x(), f.y(), f.z(), c));
             if (invalido) {
@@ -281,12 +282,12 @@ public class CongelarYCarcel {
 
     private static boolean congelado(Entity e) {
         return e instanceof ServerPlayer p && Castigos.activo(p.server, p.getUUID(), TipoCastigo.CONGELAR)
-                && !Staff.esStaff(p);
+                && !Castigos.esStaff(p.server, p.getGameProfile());
     }
 
     private static boolean preso(Entity e) {
         return e instanceof ServerPlayer p && Castigos.activo(p.server, p.getUUID(), TipoCastigo.CARCEL)
-                && !Staff.esStaff(p);
+                && !Castigos.esStaff(p.server, p.getGameProfile());
     }
 
     private static void cancelar(Event ev) {
@@ -387,7 +388,12 @@ public class CongelarYCarcel {
 
     @SubscribeEvent
     public void alClicDerechoBloque(PlayerInteractEvent.RightClickBlock ev) {
-        if (congelado(ev.getEntity())) cancelar(ev);
+        if (congelado(ev.getEntity())) {
+            cancelar(ev);
+        } else if (preso(ev.getEntity())) {
+            // Puertas y botones siguen funcionando; usar objetos sobre bloques (fuego, harina de hueso, hachas...) no.
+            ev.setUseItem(Event.Result.DENY);
+        }
     }
 
     @SubscribeEvent

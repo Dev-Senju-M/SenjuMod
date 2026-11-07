@@ -16,7 +16,7 @@ public final class RegistroLogCastigos {
 
     private RegistroLogCastigos() {}
 
-    /** accion: APLICAR o PERDONAR. */
+    /** accion: APLICAR, PERDONAR o VENCER (staff "sistema"). */
     public static void anotar(MinecraftServer server, String staff, String accion, String jugador, String uuid,
             String castigo, String duracion, String motivo) {
         try {

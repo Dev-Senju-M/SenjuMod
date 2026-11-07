@@ -96,9 +96,12 @@ public class MenuConfirmar extends MenuSoloLectura {
                     Castigos.Resultado r = Castigos.aplicar(sp, objetivo, castigo, duracion, motivo);
                     if (r == Castigos.Resultado.SIN_CARCEL) {
                         sp.displayClientMessage(Component.translatable("senjucore.castigo.sincarcel"), true);
+                    } else if (r == Castigos.Resultado.DESCONECTADO) {
+                        sp.displayClientMessage(Component.translatable("senjucore.castigo.desconectado",
+                                objetivo.getName() != null ? objetivo.getName() : String.valueOf(objetivo.getId())), true);
                     }
                 } finally {
-                    // OK, ES_STAFF y VETADO: de vuelta al panel (ES_STAFF ya aviso al actor desde Castigos).
+                    // OK, ES_STAFF, VETADO y DESCONECTADO: de vuelta al panel (ES_STAFF ya aviso al actor desde Castigos).
                     MenuStaff.abrir(sp);
                 }
                 return false;

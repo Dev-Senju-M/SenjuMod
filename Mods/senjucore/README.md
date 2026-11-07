@@ -156,8 +156,8 @@ Castigar abre `MenuSelector` en modo `CASTIGAR` (el modo `INVENTARIO` no cambia)
 
 `EfectosCastigos` (`staff.castigos`) registra los efectos de silenciar, expulsar, banear y quitar horas:
 
-- **Silenciar**: cancela `ServerChatEvent` y los comandos `msg/tell/w/me/say/teammsg/tm` (raíz del comando, también dentro de `/execute ... run`) y avisa con la fecha de fin y el motivo. Solo a no staff. El chat se evalúa en un hilo de trabajo, así que lee una copia segura (`ConcurrentHashMap`) mantenida solo en el hilo del servidor, nunca el registro guardado.
-- **Expulsar**: desconecta con el motivo; no deja estado activo (solo historial).
+- **Silenciar**: cancela `ServerChatEvent` y los comandos `msg/tell/w/me/say/teammsg/tm` (raíz del comando, también dentro de `/execute ... run`) y avisa con la fecha de fin y el motivo. El staff no puede ser silenciado al aplicar; quien ya estaba silenciado y luego es promovido a staff sigue silenciado hasta que termine el silencio o se perdone. El chat se evalúa en un hilo de trabajo, así que lee una copia segura (`ConcurrentHashMap`) mantenida solo en el hilo del servidor, nunca el registro guardado.
+- **Expulsar**: desconecta con el motivo; no deja estado activo (solo historial). Si el objetivo se desconectó durante el asistente, se veta (`DESCONECTADO`, "X no está conectado.") y no se registra nada.
 - **Banear**: desconecta al aplicar; al entrar, primero `procesarVencidos` y luego, si el BAN sigue activo, desconecta mostrando la fecha (`yyyy-MM-dd HH:mm`) o "permanente" y el motivo (tomado de la última entrada APLICAR del historial). Límite: el intento de entrar de un baneado muestra brevemente "X se unió" / "X abandonó" a los demás (el aviso de entrada de vanilla ocurre antes de nuestra expulsión).
 - **Quitar horas**: normaliza el día, `ReglaTiempo.quitar` (permanente = todo el día), guarda (también sin conexión) y sincroniza; si se agota y el servidor aplica límite, expulsa con el mensaje del límite diario.
 - **Vencimientos**: cada 20 ticks y al entrar se llama a `Castigos.procesarVencidos` (avisa "Tu castigo de X terminó" una sola vez y llama a `alQuitar`).
@@ -299,7 +299,7 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] S en Vanish junto a esferas de experiencia: no las absorbe (pueden acercarse); al salir de Vanish las recoge.
 
 ### Castigos: efectos (S staff, N no staff; aplicar desde el panel o con `/staff banear`)
-- [ ] N silenciado 1 h: escribe en el chat y usa `/msg S hola`, `/me x`, `/say x`: no sale nada y N ve "Estás silenciado hasta <fecha>. Motivo: ...". S silenciado no queda afectado.
+- [ ] N silenciado 1 h: escribe en el chat y usa `/msg S hola`, `/me x`, `/say x`: no sale nada y N ve "Estás silenciado hasta <fecha>. Motivo: ...". Silenciar a S (staff) es rechazado con "El staff no puede ser castigado". N silenciado y luego promovido a staff (añadirlo a `staff` o `op`) sigue silenciado hasta que venza o se perdone.
 - [ ] N silenciado 1 m: al pasar el minuto N ve "Tu castigo de Silenciar terminó." (una sola vez) y puede escribir.
 - [ ] Expulsar a N: se desconecta con el motivo y puede volver a entrar de inmediato.
 - [ ] Banear a N 1 h (conectado): se desconecta con "baneado hasta <fecha>"; al reintentar entrar lo vuelve a expulsar con fecha y motivo. Banear permanente: dice "permanente".
@@ -312,6 +312,7 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] Silenciar > 10 min > motivo > Confirmar muestra cabeza "Castigar a N" con castigo, duración y motivo; Aplicar lo aplica y vuelve al panel; doble clic rápido en Aplicar aplica una sola vez (un registro en el historial).
 - [ ] Expulsar salta la duración; Quitar horas ofrece 30 min / 1 h / 2 h / Todo el día y el resumen dice "todo el día".
 - [ ] Volver en cada paso retrocede un paso; Cancelar vuelve al panel y no aplica nada (comprobar `/staff historial` o el log).
+- [ ] Expulsar: N se desconecta mientras S está en el asistente; Aplicar muestra "N no está conectado." y no registra nada.
 - [ ] Cárcel sin fijar: Aplicar muestra "No hay cárcel fijada" y no registra nada.
 - [ ] Con más de 45 motivos en la config aparecen las flechas de página; con la lista vacía hay un único "Otro".
 
@@ -337,6 +338,10 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] Perdonar la cárcel con N en la pantalla de muerte: al reaparecer queda en su posición anterior a la cárcel.
 - [ ] S lo cambia de dimensión (`/execute in minecraft:the_nether run tp N ...`): no se mueve o vuelve a la cárcel al instante.
 - [ ] N preso se desconecta y vuelve: sigue en la cárcel.
+- [ ] Cárcel en el Nether, el jugador entra desde el Overworld → aparece en la cárcel.
+- [ ] N preso ascendido a staff (añadido a `staff`): al terminar la cárcel (o perdonarla) sigue siendo devuelto a su posición anterior.
+- [ ] N preso: yesquero, bola de fuego, harina de hueso, hacha/pala/azada sobre bloques no hacen nada; puertas y botones sí funcionan.
+- [ ] Anfitrión de mundo LAN (cheats off) en la lista de `staff` de un invitado: el invitado no puede castigarlo ("El staff no puede ser castigado").
 - [ ] Encarcelar de nuevo a N ya preso (otra duración): sigue en la cárcel y al terminar vuelve a donde estaba ANTES del primer encarcelamiento.
 - [ ] Perdonar la cárcel con N conectado: vuelve a su posición anterior (dimensión incluida, con su rotación).
 - [ ] Cárcel de 1 m que vence con N desconectado (o perdón con N desconectado): al entrar aparece en su posición anterior, no en la cárcel, y ve "Tu castigo de Cárcel terminó." (si venció).
