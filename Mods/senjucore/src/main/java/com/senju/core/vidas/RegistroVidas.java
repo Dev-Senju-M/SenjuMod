@@ -64,11 +64,15 @@ public class RegistroVidas extends SavedData {
     /** Busca por nombre sin distinguir mayúsculas entre los jugadores conocidos. */
     public Optional<GameProfile> buscarPorNombre(String nombre) {
         if (nombre == null) return Optional.empty();
+        Map.Entry<UUID, Datos> primero = null;
         for (Map.Entry<UUID, Datos> e : jugadores.entrySet()) {
-            if (!e.getValue().nombre.isEmpty() && e.getValue().nombre.equalsIgnoreCase(nombre)) {
+            if (e.getValue().nombre.isEmpty() || !e.getValue().nombre.equalsIgnoreCase(nombre)) continue;
+            if (ReglaVidas.eliminado(e.getValue().vidas)) {
                 return Optional.of(new GameProfile(e.getKey(), e.getValue().nombre));
             }
+            if (primero == null) primero = e;
         }
+        if (primero != null) return Optional.of(new GameProfile(primero.getKey(), primero.getValue().nombre));
         return Optional.empty();
     }
 

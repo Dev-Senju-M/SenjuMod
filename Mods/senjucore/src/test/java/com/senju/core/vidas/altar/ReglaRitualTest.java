@@ -86,6 +86,8 @@ class ReglaRitualTest {
         assertFalse(ReglaRitual.esDeNoche(12999));
         assertTrue(ReglaRitual.esDeNoche(13000));
         assertTrue(ReglaRitual.esDeNoche(18000 + 24000L * 5));
+        assertTrue(ReglaRitual.esDeNoche(23000));
         assertFalse(ReglaRitual.esDeNoche(23001));
+        assertTrue(ReglaRitual.esDeNoche(-6000)); // floorMod -> 18000
     }
 }

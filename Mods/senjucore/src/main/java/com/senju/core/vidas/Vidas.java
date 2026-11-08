@@ -7,6 +7,7 @@ import com.senju.core.network.PaqueteVidas;
 import com.senju.core.network.Red;
 import com.senju.core.staff.castigos.Castigos;
 import com.senju.core.staff.castigos.RegistroCastigos.Posicion;
+import com.senju.core.staff.vanish.Vanish;
 import com.senju.core.vidas.RegistroVidas.Datos;
 import java.util.HashSet;
 import java.util.Optional;
@@ -60,8 +61,18 @@ public final class Vidas {
 
     // ---------------------------------------------------------------- avisos y paquetes
 
-    public static void avisarATodos(MinecraftServer server, PaqueteAviso a) {
-        Red.CANAL.send(PacketDistributor.ALL.noArg(), a);
+    /**
+     * Envía el aviso a todos; si el sujeto está en Vanish, solo a quienes pueden verlo (staff y él mismo), para
+     * no delatar a un miembro del staff oculto.
+     */
+    public static void avisarATodos(MinecraftServer server, PaqueteAviso a, @Nullable ServerPlayer sujeto) {
+        if (sujeto == null || !Vanish.esta(sujeto)) {
+            Red.CANAL.send(PacketDistributor.ALL.noArg(), a);
+            return;
+        }
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            if (Vanish.puedeVer(sujeto, p)) Red.enviarA(p, a);
+        }
     }
 
     /** Envía sus vidas al HUD del propio jugador (-1 si está exento). */
@@ -95,7 +106,7 @@ public final class Vidas {
         d.vidas = ReglaVidas.restar(d.vidas);
         reg.setDirty();
         if (ReglaVidas.eliminado(d.vidas)) REVISAR.add(p.getUUID());
-        avisarATodos(server, new PaqueteAviso(d.nombre, d.vidas, total(d.vidas), ReglaVidas.avisoTrasMuerte(d.vidas)));
+        avisarATodos(server, new PaqueteAviso(d.nombre, d.vidas, total(d.vidas), ReglaVidas.avisoTrasMuerte(d.vidas)), p);
         enviarVidas(p);
     }
 
@@ -112,7 +123,7 @@ public final class Vidas {
         ServerPlayer online = server.getPlayerList().getPlayer(id);
         boolean eraEliminado = ReglaVidas.eliminado(d.vidas);
         if (eraEliminado && n > 0) {
-            revivir(server, gp, n, null);
+            revivir(server, gp, n, d.pendienteRevivir > 0 ? d.posRevivir : null);
             return;
         }
         d.vidas = n;
@@ -125,7 +136,7 @@ public final class Vidas {
         if (online != null) {
             if (n == 0 && !eraEliminado && cuenta(online)) {
                 REVISAR.add(id);
-                avisarATodos(server, new PaqueteAviso(d.nombre, 0, total(0), TipoAviso.ELIMINADO));
+                avisarATodos(server, new PaqueteAviso(d.nombre, 0, total(0), TipoAviso.ELIMINADO), online);
             }
             enviarVidas(online);
         }
@@ -172,7 +183,7 @@ public final class Vidas {
         if (!teletransportar(p, lugar)) teletransportarAReaparicion(p);
         p.resetFallDistance();
         enviarVidas(p);
-        avisarATodos(server, new PaqueteAviso(d.nombre, n, total(n), TipoAviso.RESUCITADO));
+        avisarATodos(server, new PaqueteAviso(d.nombre, n, total(n), TipoAviso.RESUCITADO), p);
         return true;
     }
 

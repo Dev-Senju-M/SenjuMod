@@ -1,5 +1,6 @@
 package com.senju.core.vidas;
 
+import com.senju.core.staff.castigos.Castigos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
@@ -36,9 +37,9 @@ public class EventosVidas {
     public void alEntrar(PlayerEvent.PlayerLoggedInEvent ev) {
         if (!(ev.getEntity() instanceof ServerPlayer p)) return;
         RegistroVidas reg = RegistroVidas.de(p.server);
-        RegistroVidas.Datos d = reg.datos(p.getUUID());
-        if (!d.nombre.equals(p.getGameProfile().getName())) {
-            d.nombre = p.getGameProfile().getName();
+        RegistroVidas.Datos d0 = reg.datosSiExisten(p.getUUID());
+        if (d0 != null && !d0.nombre.equals(p.getGameProfile().getName())) {
+            d0.nombre = p.getGameProfile().getName();
             reg.setDirty();
         }
         // Otro handler ya lo desconectó en este login (ban, límite diario): no aplicar nada; sigue pendiente.
@@ -53,8 +54,8 @@ public class EventosVidas {
         // Primero el revivir pendiente, después el rechazo por eliminado.
         if (Vidas.aplicarPendiente(p)) return;
         if (Vidas.eliminado(p.server, p.getGameProfile())) {
-            if (p.server.isSingleplayerOwner(p.getGameProfile())) {
-                // El anfitrión de un mundo local no puede quedar fuera de su propio mundo: solo espectador.
+            if (p.server.isSingleplayerOwner(p.getGameProfile()) || Castigos.esStaff(p.server, p.getGameProfile())) {
+                // El anfitrión local y el staff no se expulsan (podrían quedar sin nadie que los revive): espectador.
                 p.setGameMode(GameType.SPECTATOR);
             } else {
                 com.senju.core.ExpulsadosAlEntrar.marcar(p.getUUID());
@@ -63,6 +64,14 @@ public class EventosVidas {
             }
         }
         Vidas.enviarVidas(p);
+    }
+
+    /** Un eliminado solo puede estar en espectador (revivir restaura las vidas antes de cambiar el modo). */
+    @SubscribeEvent
+    public void alCambiarModo(PlayerEvent.PlayerChangeGameModeEvent ev) {
+        if (!(ev.getEntity() instanceof ServerPlayer p) || p instanceof FakePlayer) return;
+        if (ev.getNewGameMode() == GameType.SPECTATOR) return;
+        if (Vidas.eliminado(p.server, p.getGameProfile())) ev.setCanceled(true);
     }
 
     @SubscribeEvent
