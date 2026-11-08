@@ -41,6 +41,10 @@ public class AltarDraconicoBlock extends Block {
         // Mano principal vacia con algo en la otra mano: se deja usar la otra mano (colocar bloques).
         if (mano.isEmpty() && !player.getOffhandItem().isEmpty()) return InteractionResult.PASS;
         if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (mano.isEmpty() && player.isShiftKeyDown()) {
+            if (player instanceof ServerPlayer sp) GuiaAltar.activar(sp, pos);
+            return InteractionResult.CONSUME;
+        }
         if (mano.isEmpty()) {
             // Solo una pista, sin comprobar el resto.
             player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("senjucore.ritual.pergamino"));

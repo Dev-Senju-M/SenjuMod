@@ -48,6 +48,7 @@ public class SenjuCore {
         com.senju.core.staff.castigos.CongelarYCarcel.registrarEfectos();
         MinecraftForge.EVENT_BUS.register(new com.senju.core.staff.castigos.CongelarYCarcel());
         MinecraftForge.EVENT_BUS.register(new com.senju.core.vidas.EventosVidas());
+        MinecraftForge.EVENT_BUS.register(new com.senju.core.vidas.altar.GuiaAltar());
         LOGGER.info("Senju Core cargado");
     }
 }

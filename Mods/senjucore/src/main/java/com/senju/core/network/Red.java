@@ -34,6 +34,9 @@ public final class Red {
         CANAL.registerMessage(id++, PaqueteVidas.class, PaqueteVidas::encode,
                 PaqueteVidas::decode, PaqueteVidas::handle,
                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        CANAL.registerMessage(id++, PaqueteGuia.class, PaqueteGuia::encode,
+                PaqueteGuia::decode, PaqueteGuia::handle,
+                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
 
     public static void enviarA(ServerPlayer p, Object paquete) {
