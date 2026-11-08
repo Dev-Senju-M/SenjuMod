@@ -242,14 +242,23 @@ Bloque `senjucore:altar_draconico` (pestaña de bloques funcionales; dureza de o
 2. Estructura completa, **de noche** (tiempo 13000-23000 en el Overworld; la lluvia de día no cuenta; en otra dimensión con `ritualDeNoche=true` siempre falta "noche"), al menos `jugadoresRitual` jugadores vivos y no espectadores a 8 bloques o menos del centro del altar (el que lo activa cuenta; el staff cuenta como jugador), y un **tótem** en el inventario del que lo activa (principal u offhand).
 3. Los objetos se consumen también en creativo. Un objetivo cuyo revivir ya está pendiente ("ya va a resucitar") no consume nada. El altar no se mueve con pistones. Si algo falta, se envía un mensaje por cada cosa que falta y **no se consume nada**. Si todo está bien: se consume 1 papel y 1 tótem, rayo solo visual, partículas de fuego y sonido de tótem, y el jugador revive con `vidasAlRevivir` vidas sobre el altar (conectado: en el acto; desconectado: al entrar). El aviso "HA RESUCITADO" lo emite `Vidas.revivir`.
 
+### Guía de construcción
+
+Al **colocar el altar** (quien lo coloca) o con **clic derecho agachado y la mano principal vacía** sobre él se activa una guía que solo ve ese jugador:
+- **Bloques fantasma**: obsidiana translúcida en cada hueco de pilar que falta y antorcha de almas translúcida encima de cada pilar; laten suavemente y tienen contorno ámbar. Al colocar el bloque correcto su fantasma desaparece (refresco cada 10 ticks).
+- Un **bloque equivocado** en una posición de la estructura se marca con un contorno **rojo** (sin fantasma). Los bloques reemplazables (hierba, nieve...) cuentan como hueco.
+- **Barra de acción**: `Pilares completos: N/4`. **Chat** al activarse: `Faltan: X obsidiana(s), Y antorcha(s) de almas`.
+- **Termina** al completar la estructura (mensaje "El altar está listo..."), a los 2 minutos, si el jugador se aleja más de 32 bloques o cambia de dimensión, si el altar se rompe o si se desconecta. El cliente también la borra al salir del servidor o cambiar de dimensión.
+
 ## Estructura (`com.senju.core`)
 
 - `config`: `CommonConfig`, `ClientConfig`.
 - `tiempo`: `ReglaTiempo` (lógica pura), `EstadoTiempo`, `RegistroTiempo` (guardado), `ControlTiempo` (eventos del servidor), `ComandoTiempo`.
-- `network`: `Red`, `PaqueteTiempo`, `PaqueteInfoServidor`, `PaqueteVanish`, `PaqueteAviso`, `PaqueteVidas`.
+- `network`: `Red`, `PaqueteTiempo`, `PaqueteInfoServidor`, `PaqueteVanish`, `PaqueteAviso`, `PaqueteVidas`, `PaqueteGuia`.
 - `vidas`: `ReglaVidas`, `TipoAviso` (lógica pura), `RegistroVidas` (guardado), `Vidas` (servicio), `EventosVidas`, `ComandoVidas`.
-- `vidas.altar`: `EstructuraAltar`, `ReglaRitual` (lógica pura), `AltarDraconicoBlock`, `BloquesMod`, `Ritual`.
+- `vidas.altar`: `EstructuraAltar`, `ReglaRitual` (lógica pura), `EstadoGuia` (lógica pura), `AltarDraconicoBlock`, `BloquesMod`, `Ritual`, `GuiaAltar` (guía en el servidor).
 - `cliente`: `PanelHud`, `Teclas`, `EventosCliente`, `DatosCliente`, `Posicion`, `Formato`.
+- `cliente.guia`: `GuiaCliente` (guía recibida), `RenderGuia` (bloques fantasma y contornos).
 - `cliente.aviso`: `LineaTiempoAviso` (lógica pura), `AvisoDraconico` (overlay, cola, brasas).
 - `staff`: `Staff`, `ReglaStaff` (lógica pura), `ItemsMod`, `PlacaStaffItem`, `ProteccionPlaca`, `ComandoStaff`.
 - `staff.menu`: `AccionMenu`, `Paginacion`, `DisposicionInventario` (lógica pura), `MenuSoloLectura` (base), `MenuStaff`, `MenuSelector`, `MenuVerInventario`, `MenuVerEnder`, `MenuProhibidos` (menús), `BotonesMenu`, `CopiaVista` (ítems).
@@ -258,7 +267,7 @@ Bloque `senjucore:altar_draconico` (pestaña de bloques funcionales; dureza de o
 - `staff.vanish`: `ReglaVanish` (lógica pura), `RegistroVanish` (guardado), `Vanish` (estado, visibilidad, eventos).
 - `mixin`: `ServerPlayerMixin`, `PlayerListMixin`, `ServerGamePacketListenerImplMixin` (ocultación de Vanish).
 
-Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest`, `EfectosTest`, `ReglaStaffTest`, `ReglaVanishTest`, `AccionMenuTest`, `PaginacionTest`, `DisposicionInventarioTest`, `ListaProhibidosTest`, `DuracionTest`, `EstadoCastigosTest`, `ReglaPosicionTest`, `ReglaVidasTest`, `LineaTiempoAvisoTest`, `EstructuraAltarTest`, `ReglaRitualTest`.
+Tests unitarios (JUnit): `ReglaTiempoTest`, `PosicionTest`, `FormatoTest`, `HumoTest`, `EfectosTest`, `ReglaStaffTest`, `ReglaVanishTest`, `AccionMenuTest`, `PaginacionTest`, `DisposicionInventarioTest`, `ListaProhibidosTest`, `DuracionTest`, `EstadoCastigosTest`, `ReglaPosicionTest`, `ReglaVidasTest`, `LineaTiempoAvisoTest`, `EstructuraAltarTest`, `ReglaRitualTest`, `EstadoGuiaTest`.
 
 ## Pruebas dentro del juego (checklist)
 
@@ -468,3 +477,13 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 - [ ] Varias cosas faltando a la vez: un mensaje por cada una.
 - [ ] Todo correcto: se gasta 1 papel y 1 tótem, rayo sin daño ni fuego, partículas, sonido; N vuelve con `vidasAlRevivir` vidas sobre el altar y sale el aviso "HA RESUCITADO" una sola vez (conectado, y también desconectado: al entrar).
 - [ ] Con un bloque o herramienta en la mano, el clic derecho no inicia el ritual. Servidor dedicado: arranca sin errores.
+
+### Guía de construcción del altar (S en supervivencia o creativo)
+- [ ] Colocar el altar en un sitio vacío: aparecen 8 obsidianas y 4 antorchas de almas translúcidas que laten, con contorno ámbar; chat "Faltan: 8 obsidiana(s), 4 antorcha(s) de almas"; barra de acción "Pilares completos: 0/4".
+- [ ] Colocar una obsidiana en un hueco: su fantasma desaparece en menos de un segundo. Completar un pilar: la barra sube a 1/4.
+- [ ] Poner tierra (u obsidiana llorona) en un hueco: contorno rojo, sin fantasma. Hierba alta o nieve en un hueco: sigue saliendo el fantasma.
+- [ ] Clic derecho agachado con la mano vacía sobre el altar: la guía se reactiva y repite el mensaje de materiales. Sin agacharse: solo la pista del pergamino.
+- [ ] Completar la estructura: los fantasmas desaparecen y sale "El altar está listo...".
+- [ ] Esperar 2 minutos, alejarse más de 32 bloques, entrar a un portal o romper el altar: la guía desaparece y no queda nada dibujado.
+- [ ] Salir al menú con la guía activa y volver a entrar: no queda ningún fantasma.
+- [ ] Otro jugador cerca no ve la guía. Los fantasmas no tapan el cielo, el agua ni las partículas de forma rara; el HUD y el aviso dracónico se ven igual que antes. Servidor dedicado: arranca sin errores.
