@@ -139,5 +139,6 @@
   "senjucore.logro.pacto": "Pacto con el Dragón",
   "senjucore.logro.pacto.desc": "Fabrica un Altar Dracónico",
   "senjucore.logro.resurreccion": "De entre los muertos",
-  "senjucore.logro.resurreccion.desc": "Participa en un ritual de resurrección"
+  "senjucore.logro.resurreccion.desc": "Participa en un ritual de resurrección",
+  "senjucore.mision.nueva_personal": "Nueva misión personal: %s"
 }

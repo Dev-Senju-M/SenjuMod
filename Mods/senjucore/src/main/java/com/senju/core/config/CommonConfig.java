@@ -19,6 +19,9 @@ public final class CommonConfig {
     public static final ForgeConfigSpec.IntValue JUGADORES_RITUAL;
     public static final ForgeConfigSpec.BooleanValue RITUAL_DE_NOCHE;
 
+    public static final ForgeConfigSpec.IntValue AVISO_MINUTOS_ANTES;
+    public static final ForgeConfigSpec.IntValue INTERVALO_REVISION;
+
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
         NOMBRE_SERVIDOR = b.comment("Nombre del servidor mostrado en el panel")
@@ -46,6 +49,10 @@ public final class CommonConfig {
                 .defineInRange("jugadoresRitual", 3, 1, 20);
         RITUAL_DE_NOCHE = b.comment("Si es true, el ritual solo se puede hacer de noche")
                 .define("ritualDeNoche", true);
+        AVISO_MINUTOS_ANTES = b.comment("Minutos antes de medianoche para avisar a quien no ha cumplido la mision del dia")
+                .defineInRange("avisoMinutosAntes", 10, 1, 1440);
+        INTERVALO_REVISION = b.comment("Cada cuantos ticks se revisan las misiones de los jugadores")
+                .defineInRange("intervaloRevision", 40, 1, 1200);
         SPEC = b.build();
     }
 
