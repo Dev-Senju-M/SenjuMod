@@ -21,6 +21,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 /** Servicio de misiones del servidor (crear, editar, asignar, consultar). */
@@ -139,6 +140,42 @@ public final class Misiones {
             }
         }
         return r;
+    }
+
+    /**
+     * Crédito personal: suma {@code cantidad} al progreso del ítem en cada misión activa que lo pida. Nada si ninguna lo
+     * pide; ignora creativo y espectador.
+     */
+    public static void acreditar(ServerPlayer p, Item item, int cantidad) {
+        if (item == null || cantidad <= 0) return;
+        acreditarId(p, BuiltInRegistries.ITEM.getKey(item).toString(), cantidad);
+    }
+
+    /** Como {@link #acreditar} pero con el id de registro del ítem. */
+    static void acreditarId(ServerPlayer p, String id, int cantidad) {
+        if (cantidad <= 0 || p.isCreative() || p.isSpectator()) return;
+        List<Mision> act = activas(p);
+        if (act.isEmpty()) return;
+        RegistroMisiones r = RegistroMisiones.de(p.server);
+        DatosJugador d = r.datos(p.getUUID());
+        boolean algo = false;
+        for (Mision m : act) {
+            if (!m.objetivos.containsKey(id)) continue;
+            Map<String, Integer> prog = d.progreso.computeIfAbsent(m.id, k -> new HashMap<>());
+            prog.merge(id, cantidad, (a, b) -> (int) Math.min(Integer.MAX_VALUE, (long) a + b));
+            algo = true;
+        }
+        if (!algo) return;
+        r.setDirty();
+        marcarCambio(p);
+    }
+
+    /** Ids de ítem pedidos por las misiones activas del jugador (vacío en creativo/espectador). */
+    static Set<String> idsPedidos(ServerPlayer p) {
+        Set<String> ids = new HashSet<>();
+        if (p.isCreative() || p.isSpectator()) return ids;
+        for (Mision m : activas(p)) ids.addAll(m.objetivos.keySet());
+        return ids;
     }
 
     /** Pide revisión y reenvío del HUD de este jugador en el próximo tick. */
