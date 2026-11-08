@@ -244,9 +244,9 @@ Bloque `senjucore:altar_draconico` (pestaña de bloques funcionales; dureza de o
 
 ### Guía de construcción
 
-Al **colocar el altar** (quien lo coloca) o con **clic derecho agachado y la mano principal vacía** sobre él se activa una guía que solo ve ese jugador:
+Al **colocar el altar** (quien lo coloca) o con **clic derecho agachado y las dos manos vacías** sobre él se activa una guía que solo ve ese jugador:
 - **Bloques fantasma**: obsidiana translúcida en cada hueco de pilar que falta y antorcha de almas translúcida encima de cada pilar; laten suavemente y tienen contorno ámbar. Al colocar el bloque correcto su fantasma desaparece (refresco cada 10 ticks).
-- Un **bloque equivocado** en una posición de la estructura se marca con un contorno **rojo** (sin fantasma). Los bloques reemplazables (hierba, nieve...) cuentan como hueco.
+- Un **bloque equivocado** en una posición de la estructura se marca con un contorno **rojo** (sin fantasma). Los bloques reemplazables (hierba alta, una sola capa de nieve, agua...) cuentan como hueco.
 - **Barra de acción**: `Pilares completos: N/4`. **Chat** al activarse: `Faltan: X obsidiana(s), Y antorcha(s) de almas`.
 - **Termina** al completar la estructura (mensaje "El altar está listo..."), a los 2 minutos, si el jugador se aleja más de 32 bloques o cambia de dimensión, si el altar se rompe o si se desconecta. El cliente también la borra al salir del servidor o cambiar de dimensión.
 
@@ -481,7 +481,7 @@ nombre si `online-mode=false`) o probar en el servidor real con un amigo. Llamar
 ### Guía de construcción del altar (S en supervivencia o creativo)
 - [ ] Colocar el altar en un sitio vacío: aparecen 8 obsidianas y 4 antorchas de almas translúcidas que laten, con contorno ámbar; chat "Faltan: 8 obsidiana(s), 4 antorcha(s) de almas"; barra de acción "Pilares completos: 0/4".
 - [ ] Colocar una obsidiana en un hueco: su fantasma desaparece en menos de un segundo. Completar un pilar: la barra sube a 1/4.
-- [ ] Poner tierra (u obsidiana llorona) en un hueco: contorno rojo, sin fantasma. Hierba alta o nieve en un hueco: sigue saliendo el fantasma.
+- [ ] Poner tierra (u obsidiana llorona) en un hueco: contorno rojo, sin fantasma. Hierba alta o una capa de nieve en un hueco: sigue saliendo el fantasma.
 - [ ] Clic derecho agachado con la mano vacía sobre el altar: la guía se reactiva y repite el mensaje de materiales. Sin agacharse: solo la pista del pergamino.
 - [ ] Completar la estructura: los fantasmas desaparecen y sale "El altar está listo...".
 - [ ] Esperar 2 minutos, alejarse más de 32 bloques, entrar a un portal o romper el altar: la guía desaparece y no queda nada dibujado.
