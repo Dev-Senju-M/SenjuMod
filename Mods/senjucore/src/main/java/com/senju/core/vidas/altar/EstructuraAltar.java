@@ -44,7 +44,7 @@ public final class EstructuraAltar {
             boolean ok = true;
             for (int k = 0; k < 3; k++) {
                 Pos p = POSICIONES.get(i + k);
-                String bueno = p.esperado() == EstadoGuia.Esperado.OBSIDIANA ? OBSIDIANA : FUEGO_ALMAS;
+                String bueno = EstadoGuia.tipoLogico(p.esperado());
                 if (!bueno.equals(bloqueEn.apply(new int[] {p.dx(), p.dy(), p.dz()}))) ok = false;
             }
             if (!ok) {

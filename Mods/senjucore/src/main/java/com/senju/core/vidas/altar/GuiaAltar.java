@@ -45,7 +45,11 @@ public final class GuiaAltar {
         List<EstadoGuia.Esperado> esperados = new ArrayList<>(pos.size());
         List<EstadoGuia.EstadoPos> estados = new ArrayList<>(pos.size());
         for (EstructuraAltar.Pos p : pos) {
-            String tipo = Ritual.tipoLogico(level.getBlockState(altar.offset(p.dx(), p.dy(), p.dz())));
+            var bs = level.getBlockState(altar.offset(p.dx(), p.dy(), p.dz()));
+            // Reemplazables (hierba alta, nieve, agua...) cuentan como hueco libre, no como bloque equivocado.
+            String tipo = Ritual.tipoLogico(bs);
+            // (el fuego de almas tambien es reemplazable: solo se reclasifica lo que no es valido)
+            if ("otro".equals(tipo) && bs.canBeReplaced()) tipo = "aire";
             EstadoGuia.EstadoPos st = EstadoGuia.estado(p.esperado(), tipo);
             entradas.add(new PaqueteGuia.Entrada((byte) p.dx(), (byte) p.dy(), (byte) p.dz(), p.esperado(), st));
             esperados.add(p.esperado());

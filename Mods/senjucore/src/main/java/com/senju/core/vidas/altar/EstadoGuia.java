@@ -11,8 +11,13 @@ public final class EstadoGuia {
     /** FALTA = aire/reemplazable; INCORRECTO = otro bloque distinto. */
     public enum EstadoPos { OK, FALTA, INCORRECTO }
 
+    /** Tipo lógico de {@link EstructuraAltar} que corresponde a lo esperado. */
+    public static String tipoLogico(Esperado e) {
+        return e == Esperado.OBSIDIANA ? EstructuraAltar.OBSIDIANA : EstructuraAltar.FUEGO_ALMAS;
+    }
+
     public static EstadoPos estado(Esperado e, String tipoLogico) {
-        String bueno = e == Esperado.OBSIDIANA ? EstructuraAltar.OBSIDIANA : EstructuraAltar.FUEGO_ALMAS;
+        String bueno = tipoLogico(e);
         if (bueno.equals(tipoLogico)) return EstadoPos.OK;
         if ("aire".equals(tipoLogico)) return EstadoPos.FALTA;
         return EstadoPos.INCORRECTO;
