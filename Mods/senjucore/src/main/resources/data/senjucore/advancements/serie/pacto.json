@@ -1,0 +1,17 @@
+{
+  "parent": "senjucore:serie/raiz",
+  "display": {
+    "icon": { "item": "senjucore:altar_draconico" },
+    "title": { "translate": "senjucore.logro.pacto" },
+    "description": { "translate": "senjucore.logro.pacto.desc" },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "altar": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": { "items": [ { "items": ["senjucore:altar_draconico"] } ] }
+    }
+  }
+}

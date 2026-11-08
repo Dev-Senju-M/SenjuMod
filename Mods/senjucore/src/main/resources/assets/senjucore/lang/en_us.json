@@ -130,5 +130,11 @@
   "senjucore.ritual.noeliminado": "%s no está eliminado.",
   "senjucore.ritual.completado": "Ritual completado: %s regresa de entre los muertos.",
   "block.senjucore.altar_draconico": "Altar Dracónico",
-  "senjucore.ritual.ya_resucitando": "%s ya va a resucitar."
+  "senjucore.ritual.ya_resucitando": "%s ya va a resucitar.",
+  "senjucore.logro.raiz": "Serie Senju",
+  "senjucore.logro.raiz.desc": "Sobrevive. Cada vida cuenta.",
+  "senjucore.logro.pacto": "Pacto con el Dragón",
+  "senjucore.logro.pacto.desc": "Fabrica un Altar Dracónico",
+  "senjucore.logro.resurreccion": "De entre los muertos",
+  "senjucore.logro.resurreccion.desc": "Participa en un ritual de resurrección"
 }

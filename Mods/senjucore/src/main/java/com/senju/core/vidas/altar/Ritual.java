@@ -10,7 +10,9 @@ import com.senju.core.vidas.altar.ReglaRitual.Falta;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -101,6 +103,20 @@ public final class Ritual {
         for (ServerPlayer p : level.players()) {
             if (p.distanceToSqr(centro) <= RADIO * RADIO) p.sendSystemMessage(ok);
         }
+        // Logro "De entre los muertos" para quienes participaron (vivos, no espectadores, cerca del altar).
+        for (ServerPlayer p : level.players()) {
+            if (p.isAlive() && !p.isSpectator() && p.distanceToSqr(centro) <= RADIO * RADIO) {
+                otorgarLogro(p, LOGRO_RESURRECCION, "ritual");
+            }
+        }
+    }
+
+    static final ResourceLocation LOGRO_RESURRECCION = new ResourceLocation("senjucore", "serie/resurreccion");
+
+    /** Otorga un criterio de un logro del mod; no hace nada si el logro no existe (datapack quitado). */
+    static void otorgarLogro(ServerPlayer p, ResourceLocation id, String criterio) {
+        Advancement adv = p.server.getAdvancements().getAdvancement(id);
+        if (adv != null) p.getAdvancements().award(adv, criterio);
     }
 
     private static String clave(Falta f) {

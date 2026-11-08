@@ -1,0 +1,12 @@
+{
+  "parent": "senjucore:serie/pacto",
+  "display": {
+    "icon": { "item": "minecraft:totem_of_undying" },
+    "title": { "translate": "senjucore.logro.resurreccion" },
+    "description": { "translate": "senjucore.logro.resurreccion.desc" },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": { "ritual": { "trigger": "minecraft:impossible" } }
+}

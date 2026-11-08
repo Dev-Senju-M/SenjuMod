@@ -1,0 +1,11 @@
+{
+  "display": {
+    "icon": { "item": "senjucore:altar_draconico" },
+    "title": { "translate": "senjucore.logro.raiz" },
+    "description": { "translate": "senjucore.logro.raiz.desc" },
+    "background": "minecraft:textures/block/crying_obsidian.png",
+    "show_toast": false,
+    "announce_to_chat": false
+  },
+  "criteria": { "tick": { "trigger": "minecraft:tick" } }
+}

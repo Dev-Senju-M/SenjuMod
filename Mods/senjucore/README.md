@@ -214,6 +214,11 @@ Castigar abre `MenuSelector` en modo `CASTIGAR` (el modo `INVENTARIO` no cambia)
 
 Bloque `senjucore:altar_draconico` (pestaña de bloques funcionales; dureza de obsidiana 50/1200, luz 10, hace falta pico de diamante; suelta el propio bloque; partículas de llama en el cliente).
 
+**Libro de recetas y logros:** la receta del altar se desbloquea en el libro de recetas al conseguir un **tótem de la inmortalidad**. Hay una pestaña de logros **"Serie Senju"** con: *Pacto con el Dragón* (fabricar el altar, meta) y *De entre los muertos* (desafío; lo reciben todos los jugadores vivos que estén a ≤ 8 bloques del altar cuando un ritual sale bien).
+- [ ] Conseguir un tótem → la receta del altar aparece en el libro de recetas.
+- [ ] Fabricar el altar → aviso de logro "Pacto con el Dragón".
+- [ ] Ritual completado → los participantes reciben "De entre los muertos".
+
 **Receta** (con forma): `C` obsidiana llorona, `G` bloque de oro, `E` ojo de ender, `T` tótem de la inmortalidad.
 
 ```
